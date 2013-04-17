@@ -1,0 +1,61 @@
+// file membrane.edp
+real theta=pi;
+real a=2.,b=1.,lamda = 1.5; // the length of the semimajor axis and  semiminor axis
+//For region definition:
+
+func z=x;
+
+border Gamma1(t=0,theta)    { x = a * cos(t); y = b*sin(t); label = 1;}
+border Gamma2(t=theta,2*pi) { x = a * cos(t); y = b*sin(t); label = 1;}
+border Gamma3(t=0,theta)    { x = a/lamda * cos(t); y = b/lamda*sin(t); label = 2;}
+border Gamma4(t=theta,2*pi) { x = a/lamda * cos(t); y = b/lamda*sin(t);label = 2 ; }
+
+mesh Th=buildmesh(Gamma3(30)+Gamma4(30)+Gamma1(50)+Gamma2(50));   // construction of mesh
+
+/*The following have single purpose to extract the region
+ *so we can define a function for material parameters
+ */
+fespace Ph(Th,P0);
+Ph reg = region;
+int regExternal  = reg(0.,0.);
+int regInternal  = reg(0.,a-0.01);
+cout << "internal: " << regInternal << ", external: " << regExternal << endl;
+// exit(1);
+
+/*
+ *Here the function that is used as a material parameter 
+ *function is defined. We can use material parameters used in
+ *a real problem.
+ */
+Ph mp = region == regInternal ? 1. : 2.;
+
+fespace Vh(Th,P2); // P2 conforming triangular FEM
+Vh phi,w, f=1, unused;
+
+varf LaplaceLHS(phi,w)  =  int2d(Th)( dx(phi)*dx(w) + dy(phi)*dy(w) ) ;   // int ( d(phi) * d(w) )
+varf LaplaceRHS(unused,w) =  - int2d(Th)(f*w * mp) + on(1,unused = 2)+on(2,unused = 0);  // int( f*w*regionss )
+
+matrix A = LaplaceLHS( Vh,Vh);
+Vh F; 
+//Vh s22, s33, s23, s32;
+
+F[] = LaplaceRHS(0,Vh);
+
+
+
+phi[] = A^-1 * F[];
+
+Vh s22 = 1./(4.*3.14)*(dx(phi)*dx(phi) - 0.5 * dx(phi)*dx(phi));
+Vh s33 = 1./(4.*3.14)*(dy(phi)*dy(phi) - 0.5 * dy(phi)*dy(phi));
+Vh s23 = 1./(4.*3.14)*(dx(phi)*dy(phi));
+
+plot([s22,s33], cmm = "hydrostatic stress");
+plot(s33, cmm = "hydrostatic stress");
+plot(s22, cmm = "hydrostatic stress");
+plot(s23, cmm = "shear stress");
+
+plot(mp);
+plot(phi);
+
+//savemesh(Th,"Th.msh");
+
