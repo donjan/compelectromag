@@ -1,6 +1,0 @@
-
-calc stress tensor from E at ti
-stress forces * dt
-mesh deforming
-update Ei to what we want
-repeat
