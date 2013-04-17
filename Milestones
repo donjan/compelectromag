@@ -1,0 +1,21 @@
+Overview:
+
+1. Stress tensor as user code in FF
+
+2.a anisotropic materials
+2.b time evolution  (spectral possibly > integrators)
+2.c syntactic sugar inside FF for stress tensor
+
+3. Presentation
+_________________________________________________________________________
+
+
+17.4.
+
+Basics
+  write code for moving point charges
+  check joint movement vs elastic deformation
+Theory
+  read & understand FF++ chapter 9 (especially viscous Navier Stokes)
+Search a real world example for homogenisation (anisotropic eps)
+
