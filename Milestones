@@ -19,3 +19,11 @@ Theory
   read & understand FF++ chapter 9 (especially viscous Navier Stokes)
 Search a real world example for homogenisation (anisotropic eps)
 
+
+24.4.
+
+Mesh adaptation
+  check FF mesh adaptation on regions (if gradient high)
+  find out how to pass stress tensor to boundary conditions for elasticity
+Code
+  fix the code
