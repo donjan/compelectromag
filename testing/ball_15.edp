@@ -1,0 +1,140 @@
+
+macro borderline(a, b, lab) (t=0,1) { x = a[0]+t*(b[0]-a[0]); y = a[1]+t*(b[1]-a[1]); label = lab; } // EOM
+
+int ball = 101, boxo = 102, boxi = 103,
+    Lboxdown = 104, Lboxright = 105, Lboxup = 106, Lboxleft = 107;
+
+
+real[int]  epsilon1(9);
+real[int]  epsilon2(9);
+real e0 = 8.854187 *1;
+
+epsilon1 = [ 2.9*e0,      0,      0,
+                  0, 2.9*e0,      0,
+                  0,      0, 2.9*e0 ];
+
+epsilon2 = [ 1., 0, 0,
+             0, 1., 0,
+             0, 0, 1. ];
+
+
+
+
+
+border B(t=0,2*pi) { x = 0.2*cos(t); y = 1+0.2*sin(t); label = ball; }
+
+
+border S1 borderline([-1,0], [5,0],  Lboxdown)
+border S2 borderline([5,0],  [5,5],  Lboxright)
+border S3 borderline([5,5],  [-1,5], Lboxup)
+border S4 borderline([-1,5], [-1,0], Lboxleft)
+border S5 borderline([-0.9,0.1], [4.9,0.1],  boxi)
+border S6a borderline([4.9,0.1], [4.9,2],    boxi)
+border S6b borderline([4.9,2],   [2,2],      boxi)
+border S7a borderline([2,2],     [2,4.9],    boxi)
+border S7b borderline([2,4.9],   [-0.9,4.9], boxi)
+border S8 borderline([-0.9,4.9], [-0.9,0.1], boxi)
+
+
+mesh Bh = buildmesh( B(10) );
+mesh Sh = buildmesh( B(20) + S1(20) + S2(20) + S3(20) + S4(20) +
+                     S5(20) + S6a(20) + S6b(20) + S7a(20) + S7b(20) + S8(20) );
+//~                      S5(-20) + S6a(-20) + S6b(-20) + S7a(-20) + S7b(-20) + S8(-20) );
+
+//~ mesh Gh = Bh + Sh;
+mesh Gh = buildmesh(S1(20) + S2(20) + S3(20) + S4(20) +
+                      S5(20) + S6a(20) + S6b(20) + S7a(20) + S7b(20) + S8(20) );
+                     
+plot(Gh, value=true, ShowAxes=true, wait=true, cmm = "mesh");
+plot(Sh,wait=true);
+
+//~ Bh = movemesh(Bh, [x+1, y+1]);
+//~ Gh = Bh + Sh;
+//~ plot(Gh, value=true, ShowAxes=true, cmm = "mesh2");
+
+//fespace Ph(Sh,P0);
+fespace Ph(Gh,P0);
+Ph reg = region;
+int rE  = reg(-0.9,0.1);  // external box
+int rI  = reg(0,4);  // internal box
+cout<<rE<<","<<rI<<endl;
+
+
+macro setEps(num) (reg==rE)*epsilon1[num] + (reg==rI)*epsilon2[num]  // EOM
+Ph e11 = setEps(0);
+Ph e12 = setEps(1);
+Ph e13 = setEps(2);
+Ph e21 = setEps(3);
+Ph e22 = setEps(4);
+Ph e23 = setEps(5);
+Ph e31 = setEps(6);
+Ph e32 = setEps(7);
+Ph e33 = setEps(8);
+
+plot(e11,cmm="e11",fill=true,value=true);
+//~ cout<<e22[]<<endl;
+
+//plot(e22,cmm="e11");
+//plot(e33,cmm="e11");
+
+fespace Vh(Gh,P2);
+fespace VhBall(Bh,P2);
+
+Vh phi, w;
+
+problem LaplaceVarf(phi,w)  =  int2d(Gh)(
+            e11 * dx(phi)*dx(w)
+					+ e12 * dx(phi)*dy(w)	    
+					+ e21 * dy(phi)*dx(w)
+					+ e22 * dy(phi)*dy(w))
+					+ on(Lboxdown,phi= 2)
+					+ on(Lboxup,phi = -2);
+LaplaceVarf;
+plot(phi,wait = true);
+
+
+
+Vh E1 = 1;
+//~ Ph E1 = x;
+Vh E2 = 0;
+Vh E3 = 0;
+plot(E1, fill=true, value=true, dim=3, cmm = "E1");
+
+
+Vh D1 = E1 * e11 + E2 * e12 + E3 * e13;
+Vh D2 = E1 * e21 + E2 * e22 + E3 * e23;
+Vh D3 = E1 * e31 + E2 * e32 + E3 * e33;
+Vh T11 = E1 * D1  + 0.5 * (E1*D1 + E2*D2 + E3*D3  );
+Vh T22 = E2 * D2  + 0.5 * (E1*D1 + E2*D2 + E3*D3  );
+Vh T33 = E3 * D3  + 0.5 * (E1*D1 + E2*D2 + E3*D3  );
+Vh T12 = E1 * D2 ;
+Vh T21 = E2 * D1 ;
+Vh T13 = E1 * D3 ;
+Vh T23 = E1 * D3 ;
+Vh f1 = dx(T11)+dy(T21);
+Vh f2 = dx(T21)+dy(T22);
+
+plot([f1,f2], cmm="forces");
+
+
+
+
+real sqrt2=sqrt(2.);
+macro epsilon(u1,u2)  [dx(u1),dy(u2),(dy(u1)+dx(u2))/sqrt2] // EOM
+
+solve lame([u,v],[uu,vv])= int2d(Bh)(
+        ((reg==1)?lambda1:lambda2)*div(u,v)*div(uu,vv)
+        +2.*((reg==1)?mu1:mu2)*( epsilon(u,v)'*epsilon(uu,vv) ) )
+       	- int2d(Th)(f1*uu)-int2d(Th)(f2*vv)
+        + on(7,u=0,v=0)+on(5,u=0,v=0);
+
+
+real dt = 0.1, tend = 3;
+real t;
+for (int m=0;m<=tend/dt;m++) {
+  t += dt;
+  f1 = dx(T11)+dy(T21);
+  f2 = dx(T21)+dy(T22);
+//~   Bh = movemesh(Bh, [x+u, y+v]);
+}
+
