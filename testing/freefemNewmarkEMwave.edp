@@ -1,0 +1,99 @@
+//Time integration of a wave equation with the newmark scheme:
+//Reference: Time Domain Electromagnetics - (reference from Hafner;s book - available at Science Direct)
+//Gregoire Allaire - Numerical Analysis and Optimization - pg 
+
+//macro incidentWave(t,T,cc,theta) exp(-(4./T * (-1.* cc * (t) + x * cos(theta)+y*sin(theta)))^2) //EOM
+macro incidentWave(t,T,cc,theta) (x<t*cc?1.:0.)*sin(x*T*pi-t*T*pi) //EOM
+macro vwave() 0*sin(2*pi*x)*cos(2*pi*y) //EOM
+macro uwave() 0*sin(3*pi*x)*cos(4*pi*y) //EOM
+macro Mvarf(multWith,uTrial,uTest) int2d(Th)(multWith*uTrial*uTest) //EOM
+macro Kvarf(multWith,uTrial,uTest) int2d(Th)(multWith*dx(uTrial)*dx(uTest) +multWith*dy(uTrial)*dy(uTest)) //EOM
+macro KvarfBC(t,m,uTest) = int2d(Th)(m*uTest*t) //EOM
+
+//Newmark's parameters;
+real alpha = 0.25;
+real delta = 0.5;
+real c = 0.01; //speed of light
+real dt = 0.5;
+real tFinal = 500;
+border Ch(t=0,2*pi) {x=0.5+0.3*cos(t);y=0.5+0.3*sin(t);}
+mesh Th =buildmesh(Ch(10))+square(20,20);
+//Th = square(20,20)+Th;
+
+//real aaa=incidentWave(5.,1.,5.,30.);
+
+fespace Vh(Th,P2);
+
+Vh uTrial,uOld,uLoad;
+
+real t=0.;
+real T=0.1;
+real theta = 30./(2*pi);
+
+real mt,mc;
+
+
+
+/*
+ * All these parameters make sense 
+ * in the context presented in "Time Domain Electrodynamics"
+ * but to really understand what the boundary conditions are 
+ * I had to check out the "Numerical Analysis andOptimization" Book (Allaire)
+ */
+
+//For the Mm matrix
+real mt1=(2./c^2);
+real mc1=(dt^2*(0.5 + delta -2*alpha));
+
+//For the Lm Matrix
+real mt2=(-1./c^2);
+real mc2=dt^2*(0.5-delta+alpha);
+
+//For the Nm matrix
+real mt3=1./c^2;
+real mc3=(dt^2*alpha);
+
+for(real t=0;t<tFinal;t+=dt){	
+//for(int i=0;i<1;i++){
+	
+	varf Mmatr(uTrial,uTest) =  Mvarf(mt1,uTest,uTrial) 
+									+Kvarf(mc1,uTest,uTrial);
+	varf Lmatr(uTrial,uTest) =  Mvarf(mt2,uTest,uTrial) 
+									+Kvarf(mc2,uTest,uTrial);
+	varf Nmatr(uTrial,uTest) =  Mvarf(mt3,uTest,uTrial)
+									+Kvarf(mc3,uTest,uTrial);
+
+	//The load vector is only obvious in the context of Allair's book:
+	//I have to multiply the current load by (0.5+delta-2*theta) (obvious because it comes from the Cvarf formulation
+	//and also the previous load vector by (0.5 - delta + theta)
+	//and the next load vector by theta. Then I have to collect all the terms related to the 
+	//current displacement and add them to my load vector. 
+
+	varf Mvect(uTrial,uTest) = int2d(Th)(uTest*( (0.5-delta+alpha) *dt^2  * ( incidentWave(t-dt,T,c,theta) ) //Load in Previous step
+												+(0.5+delta-2*alpha)*dt^2 * ( incidentWave(t,T,c,theta) )   //Load in Current step
+												+(alpha)*dt^2             * ( incidentWave(t+dt,T,c,theta) ))); //Load in Previous Step
+	varf MVis(uTrial,uTest) = int2d(Th)(uTest*(0.5+delta-2*alpha)*dt^2 * ( incidentWave(t,T,c,theta) ));   //Load in Current step
+	
+	matrix Mm = Mmatr(Vh,Vh);
+	matrix Lm = Lmatr(Vh,Vh);
+	matrix Nm = Nmatr(Vh,Vh);
+	Vh temp1x;
+	//uLoad[] = MVis(0,Vh);
+	uLoad[] = Mvect(0,Vh);
+	//plot(uLoad);
+	temp1x[] = Mm*uTrial[];
+	uLoad[]  = uLoad[] + temp1x[];	
+	temp1x[] = Nm*uOld[];
+	uLoad[]  = uLoad[]+temp1x[];
+	uOld[]=uTrial[];
+	
+	uTrial[]=Lm^-1*uLoad[];
+		
+	//Now we calculate the new field values:
+	uTrial[] = Lm^-1*uLoad[];
+	
+	cout<<"t="<<t<<endl;
+	plot(Th,uTrial);
+//plot(uTrial,wait=true);
+}
+
