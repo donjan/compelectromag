@@ -65,11 +65,14 @@ Stress tensor
 \end_layout
 
 \begin_layout Standard
-Wiki 
-\begin_inset Formula $\rightarrow$
+Maxwell stress tensor: 
+\begin_inset Formula $\sigma_{ij}=\epsilon_{0}E_{i}E_{j}+\frac{1}{\mu_{0}}B_{i}B_{j}-\frac{1}{2}(\epsilon_{0}E^{2}+\frac{1}{\mu_{0}}B^{2})\delta_{ij}$
 \end_inset
 
- papers: Maxwell stress tensor 
+
+\end_layout
+
+\begin_layout Standard
 \begin_inset VSpace bigskip
 \end_inset
 
@@ -79,6 +82,10 @@ Wiki
 \begin_layout Standard
 Differential form for boundary: 
 \begin_inset Formula $\left(\frac{dF}{ds}\right)=\frac{-t_{0}}{2}H^{2}\vec{n}+\mu_{0}(\vec{H}\vec{n})\vec{H}$
+\end_inset
+
+ 
+\begin_inset space ~
 \end_inset
 
  [0] 
