@@ -3,34 +3,67 @@
 //Gregoire Allaire - Numerical Analysis and Optimization - pg 
 
 //macro incidentWave(t,T,cc,theta) exp(-(4./T * (-1.* cc * (t) + x * cos(theta)+y*sin(theta)))^2) //EOM
-macro incidentWave(t,T,cc,theta) (x<t*cc?1.:0.)*sin(x*T*pi-t*T*pi) //EOM
+//cout<<"Not dumped 1"<<endl;
+
+macro borderline(a, b, lab) (t=0,1) { x = a[0]+t*(b[0]-a[0]); y = a[1]+t*(b[1]-a[1]); label = lab; } // EOM
+macro incidentWave(t,T,cc,theta) (1-x<t*cc?1.:0.)*sin(-2.*pi/(T*cc)*x - 2*pi/T*t) //EOM
 macro vwave() 0*sin(2*pi*x)*cos(2*pi*y) //EOM
 macro uwave() 0*sin(3*pi*x)*cos(4*pi*y) //EOM
 macro Mvarf(multWith,uTrial,uTest) int2d(Th)(multWith*uTrial*uTest) //EOM
-macro Kvarf(multWith,uTrial,uTest) int2d(Th)(multWith*dx(uTrial)*dx(uTest) +multWith*dy(uTrial)*dy(uTest)) //EOM
+macro Kvarf(multWith,uTrial,uTest) (int2d(Th)(multWith*dx(uTrial)*dx(uTest) +multWith*dy(uTrial)*dy(uTest))  /*+ on(1,2,3,4, uTest = 0)*/)//EOM
 macro KvarfBC(t,m,uTest) = int2d(Th)(m*uTest*t) //EOM
+
+
+real t=0.;
+real T=0.5;
 
 //Newmark's parameters;
 real alpha = 0.25;
 real delta = 0.5;
-real c = 0.01; //speed of light
-real dt = 0.5;
-real tFinal = 500;
-border Ch(t=0,2*pi) {x=0.5+0.3*cos(t);y=0.5+0.3*sin(t);}
-mesh Th =buildmesh(Ch(10))+square(20,20);
-//Th = square(20,20)+Th;
+real cExt = 10; //speed of light
+real cCyl = 10;
 
-//real aaa=incidentWave(5.,1.,5.,30.);
+real dt = 0.002;
+real tFinal = 50;
+//border Ch(t=0,2*pi) {x=0.5+0.3*cos(t);y=0.5+0.3*sin(t);}
+border S1 (t=0,1) { x = t  ; y=0  ; label =  1; } 
+border S2 (t=0,1) { x = 1  ; y=t  ; label =  2; } 
+border S3 (t=0,1) { x = 1-t; y=1  ; label =  3; } 
+border S4 (t=0,1) { x = 0 ; y=1-t ; label =  4; } 
 
-fespace Vh(Th,P2);
+border Bsp(t=0,2*pi) { x = 0.5+0.1*cos(t); y = 0.5+0.1*sin(t); label = 5; }
+
+real[int] disc(5);
+disc = [30,30,30,30,40];
+mesh Th =buildmesh(S1(disc[0])
+					+S2(disc[1])
+					+S3(disc[2])
+					+S4(disc[3])
+					/*+Bsp(disc[4])*/);
+plot(Th);
+//mesh Th = square(20,20);
+//~ 
+//~ //real aaa=incidentWave(5.,1.,5.,30.);
+
+fespace Ph(Th,P0);
+fespace Vh(Th,P1);
+Ph reg=region;
+Ph c;
+int regCyl = reg(0.5,0.5);
+int regExt = reg(0.7,0.7);
+
+c = reg == regCyl?cCyl:cExt;
+cout<<c[]<<","<<regExt<<endl;
+
 
 Vh uTrial,uOld,uLoad;
+uTrial = exp(-400*((0.1-x)^2+(0.2-y)^2));/*(0.49<=x)*(x<=0.51)*(0.49<=y)*(y<=0.51)*1;*/
+plot(uTrial,wait=true,fill=true,value=true);
+plot(Th,uTrial,wait=true,fill=true,value=true,bw=true);
 
-real t=0.;
-real T=0.1;
+
 real theta = 30./(2*pi);
 
-real mt,mc;
 
 
 
@@ -41,45 +74,47 @@ real mt,mc;
  * I had to check out the "Numerical Analysis andOptimization" Book (Allaire)
  */
 
+
+
 //For the Mm matrix
-real mt1=(2./c^2);
-real mc1=(dt^2*(0.5 + delta -2*alpha));
+Ph mmL=(1./c^2);
+real mkL=alpha*dt^2;
 
 //For the Lm Matrix
-real mt2=(-1./c^2);
-real mc2=dt^2*(0.5-delta+alpha);
+Ph mmM=(2./c^2);
+real mkM=dt^2*(-0.5-delta+2*alpha);
 
 //For the Nm matrix
-real mt3=1./c^2;
-real mc3=(dt^2*alpha);
-
+Ph mmN=-1./c^2;
+real mkN=(dt^2*(-0.5+delta-alpha));
+Vh temp1x;
+uOld[] = uTrial[];
 for(real t=0;t<tFinal;t+=dt){	
 //for(int i=0;i<1;i++){
+	varf Lmatr(uTrial,uTest) =  Mvarf(mmL,uTest,uTrial) 
+									+Kvarf(mkL,uTest,uTrial);
 	
-	varf Mmatr(uTrial,uTest) =  Mvarf(mt1,uTest,uTrial) 
-									+Kvarf(mc1,uTest,uTrial);
-	varf Lmatr(uTrial,uTest) =  Mvarf(mt2,uTest,uTrial) 
-									+Kvarf(mc2,uTest,uTrial);
-	varf Nmatr(uTrial,uTest) =  Mvarf(mt3,uTest,uTrial)
-									+Kvarf(mc3,uTest,uTrial);
+	varf Mmatr(uTrial,uTest) =  Mvarf(mmM,uTest,uTrial) 
+									+Kvarf(mkM,uTest,uTrial);
+	varf Nmatr(uTrial,uTest) =  Mvarf(mmN,uTest,uTrial)
+									+Kvarf(mkN,uTest,uTrial);
 
 	//The load vector is only obvious in the context of Allair's book:
 	//I have to multiply the current load by (0.5+delta-2*theta) (obvious because it comes from the Cvarf formulation
 	//and also the previous load vector by (0.5 - delta + theta)
 	//and the next load vector by theta. Then I have to collect all the terms related to the 
 	//current displacement and add them to my load vector. 
-
 	varf Mvect(uTrial,uTest) = int2d(Th)(uTest*( (0.5-delta+alpha) *dt^2  * ( incidentWave(t-dt,T,c,theta) ) //Load in Previous step
 												+(0.5+delta-2*alpha)*dt^2 * ( incidentWave(t,T,c,theta) )   //Load in Current step
 												+(alpha)*dt^2             * ( incidentWave(t+dt,T,c,theta) ))); //Load in Previous Step
-	varf MVis(uTrial,uTest) = int2d(Th)(uTest*(0.5+delta-2*alpha)*dt^2 * ( incidentWave(t,T,c,theta) ));   //Load in Current step
+	varf MVis(uTrial,uTest) = int2d(Th)(0*uTest*(0.5+delta-2*alpha)*dt^2 * ( incidentWave(t,T,c,theta) ));   //Load in Current step
 	
-	matrix Mm = Mmatr(Vh,Vh);
 	matrix Lm = Lmatr(Vh,Vh);
+	matrix Mm = Mmatr(Vh,Vh);
 	matrix Nm = Nmatr(Vh,Vh);
-	Vh temp1x;
-	//uLoad[] = MVis(0,Vh);
+	
 	uLoad[] = Mvect(0,Vh);
+	//plot(uLoad,cmm="uload",value=true,fill=true,wait=true);
 	//plot(uLoad);
 	temp1x[] = Mm*uTrial[];
 	uLoad[]  = uLoad[] + temp1x[];	
@@ -90,10 +125,12 @@ for(real t=0;t<tFinal;t+=dt){
 	uTrial[]=Lm^-1*uLoad[];
 		
 	//Now we calculate the new field values:
-	uTrial[] = Lm^-1*uLoad[];
+	//uTrial[] = Lm^-1*uLoad[];
 	
 	cout<<"t="<<t<<endl;
-	plot(Th,uTrial);
+	plot(Th,uTrial,wait=true,value=true,fill=true,ZScale=true);
+	//plot(uLoad,wait=true,value=true, fill=true);
+	
 //plot(uTrial,wait=true);
 }
-
+//~ 
