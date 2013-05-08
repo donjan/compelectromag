@@ -42,9 +42,9 @@ mesh Sh = buildmesh( S1(20) + S2(20) + S3(20) + S4(20) +
 //~                      S5(-20) + S6a(-20) + S6b(-20) + S7a(-20) + S7b(-20) + S8(-20) );
 
 //~ mesh Gh = Bh + Sh;
-mesh Gh = buildmesh(S1(20) + S2(20) + S3(20) + S4(20)
-//~                      S5(20) + S6a(20) + S6b(20) + S7a(20) + S7b(20) + S8(20) );
-                     );
+mesh Gh = buildmesh(S1(20) + S2(20) + S3(20) + S4(20) +
+                      S5(20) + S6a(20) + S6b(20) + S7a(20) + S7b(20) + S8(20) );
+                     
 plot(Gh, value=true, ShowAxes=true, wait=true, cmm = "mesh");
 
 
@@ -52,7 +52,8 @@ plot(Gh, value=true, ShowAxes=true, wait=true, cmm = "mesh");
 //~ Gh = Bh + Sh;
 //~ plot(Gh, value=true, ShowAxes=true, cmm = "mesh2");
 
-fespace Ph(Sh,P0);
+//fespace Ph(Sh,P0);
+fespace Ph(Gh,P0);
 Ph reg = region;
 int rE  = reg(-0.9,0.1);  // external box
 int rI  = reg(4,4);  // internal box
@@ -70,19 +71,25 @@ Ph e31 = setEps(6);
 Ph e32 = setEps(7);
 Ph e33 = setEps(8);
 
-fespace Vh(Bh,P2);
-Vh phi, w;
+plot(e11,cmm="e11",fill=true,value=true);
+cout<<e22[]<<endl;
 
+//plot(e22,cmm="e11");
+//plot(e33,cmm="e11");
+
+fespace Vh(Gh,P2);
+
+Vh phi, w;
 
 problem LaplaceVarf(phi,w)  =  int2d(Gh)(
             e11 * dx(phi)*dx(w)
 					+ e12 * dx(phi)*dy(w)	    
 					+ e21 * dy(phi)*dx(w)
 					+ e22 * dy(phi)*dy(w))
-					+ on(Lboxdown,phi = 2)
+					+ on(Lboxdown,phi= 2)
 					+ on(Lboxup,phi = -2);
 LaplaceVarf;
-
+plot(phi,wait = true);
 
 Vh E1 = 1;
 //~ Ph E1 = x;
