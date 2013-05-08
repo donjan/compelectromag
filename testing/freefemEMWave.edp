@@ -1,0 +1,103 @@
+//Time integration of a wave equation with the newmark scheme:
+//Reference: Time Domain Electromagnetics - (reference from Hafner;s book - available at Science Direct)
+
+
+macro incidentWave(t,T,c,theta) (exp(-(4./T*(-c*t+x*cos(theta)+y*sin(theta)))^2)) 	//EOM
+macro vwave() 0*sin(2*pi*x)*cos(2*pi*y) //EOM
+macro uwave() 0*sin(3*pi*x)*cos(4*pi*y) //EOM
+macro Tvarf(multWith,vTrial,vTest,uTrial,uTest) int2d(Th)(multWith*vTrial*vTest + multWith * uTest*uTrial) //EOM
+macro Cvarf(multWith,vTrial,vTest,uTrial,uTest) int2d(Th)(multWith*dx(uTrial)*dx(uTest) +multWith*dy(uTrial)*dy(uTest) + multWith*dy(vTrial)*dy(vTest)+multWith*dx(vTrial)*dx(vTest)) //EOM
+macro CvarfBC(t,m,vTest) = int2d(Th)(m*vTest*t) //EOM
+
+//Newmark's parameters;
+real alpha = 0.25;
+real delta = 0.5;
+real c = 3; //speed of light
+real dt = 0.1;
+real tFinal = 10;
+
+mesh Th = square(10,10);
+
+fespace Vh(Th,[P1,P1]);
+
+Vh [ uTrial,vTrial],[uTest,vTest],[uOld,vOld];
+
+//Calculate the Matrices of the Newmark integration;
+//The "stiffness" matrix without the boundary conditions
+//varf Cvarf([uTrial,vTrial],[uTest,vTest],solver = CG) = 
+
+/*
+ * The Newmark timestepping matrices
+ */
+ //uOld[]= sin(2*pi*x)*cos(4*pi*y);
+ //plot(vOld,wait=true);
+real t=0.0;
+real T=15.;
+real theta = 30./(2*pi);
+
+real mt,mc;
+for(real t=0;t<tFinal;t+=dt){	
+//for(int i=0;i<1;i++){
+	mt=(-2./c^2);
+	mc=(-dt^2*(0.5 + delta -2*alpha));
+	varf Mmatr([uTrial,vTrial],[uTest,vTest]) =  Tvarf(mt,uTest,uTrial,vTest,vTrial) 
+									+Cvarf(mc,uTest,uTrial,vTest,vTrial);
+									
+	varf Mvect([uTrial,vTrial],[uTest,vTest]) = int2d(Th)(uTest*exp(-(4./T*(-c*t+x*cos(theta)+y*sin(theta)))^2));
+	vTrial[] = Mvect(0,Vh);
+	mt=(1./c^2);
+	mc=(dt^2*alpha);
+	varf Lmatr([uTrial,vTrial],[uTest,vTest]) =  Tvarf(mt,uTest,uTrial,vTest,vTrial) 
+									+Cvarf(mc,uTest,uTrial,vTest,vTrial);
+	mc=-dt^2*(0.5-delta+alpha);
+	varf Nmatr([uTrial,vTrial],[uTest,vTest]) =  Tvarf(mt,uTest,uTrial,vTest,vTrial)
+									+Cvarf(mc,uTest,uTrial,vTest,vTrial)
+									+int2d(Th)((vTest+uTest)*sin(2*pi*x))+on(1,vTrial=1,uTrial=1);
+
+	matrix Mm = Mmatr(Vh,Vh);
+	matrix Lm = Lmatr(Vh,Vh);
+	matrix Nm = Nmatr(Vh,Vh);
+	Vh [temp1x,temp1y];
+	
+	//vOld[] = vTrial[];
+	
+	///
+	 //A terrible workaraound...
+	 // Reading the FF source code was worse...
+	 //
+	temp1x[] = Mm*uOld[];
+	cout<<temp1x[]<<endl;
+
+	temp1x[] *= -1.;
+	
+	/*
+	 * Auto paramenei panta miden!!!!
+	 */
+	
+	
+	uOld[]   = Nm*uTrial[];
+	cout<<uTrial[];
+	temp1x[] = temp1x[]-uOld[];
+	uOld[]   = uTrial[];
+
+	//Now we calculate the new field values:
+	uTrial[] = Lm^-1*temp1x[];
+	//varf bcLHS([uTrial,vTrial],[uTest,vTest], solver = CG) = on(2,vTrial=sin(t*2*pi));
+	//varf bcRHS([uTrial,vTrial],[uTest,vTest]) = on(2,vTrial=bwave(t))+int2d(Th)(vTest * vwave + uTest*uwave);
+	
+	//There are parts of the boundary conditions imposed on the RHS and on the LHS
+	//matrix bcLHSm = bcLHS(Vh,Vh);
+	//real[int] F =  bcRHS(0,Vh);
+	
+	//Seting the solver was required - there was an error message.
+	//Possibly the casting is not well implemented for matrix adition
+	//due to the many different matrix types
+	//set(B, solver = CG);
+	//uTrial[] = totalBeta^-1*F;
+	cout<<"t="<<t<<endl;
+	plot(vTrial,wait=true);
+}
+/*
+plot(Th);
+plot(vTrial);
+*/
