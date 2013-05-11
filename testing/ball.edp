@@ -184,7 +184,7 @@ Vh T21 = Ey * D1 ;
 Vh T13 = Ex * D3 ;
 Vh T23 = Ex * D3 ;
 Vh f1 = dx(T11)+dy(T21);
-Vh f2 = dx(T21)+dy(T22);
+Vh f2 = dx(T12)+dy(T22);
 
 plot([f1,f2], cmm="forces");
 
