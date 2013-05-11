@@ -1,0 +1,216 @@
+/*******************************************************************************
+ * 
+ * Move a ball according to the stress tensor
+ * 
+ * Regions: ball, vacuum, frame
+ * Solve for E (phi) on union -> get stress
+ * Solve for movement on ball
+ * move ball
+ * Repeat (update union, keep track of regions)
+ * 
+ * TODO: define regions as a function of constants, then use adaptmesh
+ * 
+ ******************************************************************************/
+
+
+
+macro plot3d(obj, label) plot(obj, fill=true, value=true, ShowAxes=true, dim=3, wait=true, cmm = label); // EOM
+macro plot2d(obj, label) plot(obj, fill=true, value=true, ShowAxes=true, dim=2, wait=true, cmm = label); // EOM
+
+macro borderline(a, b, lab) (t=0,1) { x = a[0]+t*(b[0]-a[0]); y = a[1]+t*(b[1]-a[1]); label = lab; } // EOM
+
+
+
+
+// border codes
+int Lball = 101, Lboxo = 102, Lboxi = 103,
+    Lboxdown = 104, Lboxright = 105, Lboxup = 106, Lboxleft = 107;
+
+real[int] ballstart(2);
+ballstart = [0., 1.];
+
+real e0 = 8.854187 *1;
+real[int] epsilon1(9);
+real[int] epsilon2(9);
+
+epsilon1 = [ 22.9*e0,      0,      0,
+                  0, 22.9*e0,      0,
+                  0,      0, 22.9*e0 ];
+
+epsilon2 = [ 1., 0, 0,
+             0, 1., 0,
+             0, 0, 1. ];
+
+
+
+
+border S1 borderline([-1,0], [5,0],  Lboxdown)
+border S2 borderline([5,0],  [5,5],  Lboxright)
+border S3 borderline([5,5],  [-1,5], Lboxup)
+border S4 borderline([-1,5], [-1,0], Lboxleft)
+
+//~ borderchain(S1, [-1,0], Lboxdown,
+//~             S2, [ 5,0], Lboxright,
+//~             S3, [ 5,5], Lboxup,
+//~             S4, [-1,5], Lboxleft)
+
+//~ border S5 borderline([-0.9,0.1], [4.9,0.1],  Lboxi)
+//~ border S6a borderline([4.9,0.1], [4.9,2],    Lboxi)
+//~ border S6b borderline([4.9,2],   [2,2],      Lboxi)
+//~ border S7a borderline([2,2],     [2,4.9],    Lboxi)
+//~ border S7b borderline([2,4.9],   [-0.9,4.9], Lboxi)
+//~ border S8 borderline([-0.9,4.9], [-0.9,0.1], Lboxi)
+border S5 borderline([-0.9,0.1], [4.9,0.1],  Lboxi)
+border S6a borderline([4.9,0.1], [4.9,3.8],    Lboxi)
+border S6b borderline([4.9,3.8],   [2,3.8],      Lboxi)
+border S7a borderline([2,3.8],     [2,4.9],    Lboxi)
+border S7b borderline([2,4.9],   [-0.9,4.9], Lboxi)
+border S8 borderline([-0.9,4.9], [-0.9,0.1], Lboxi)
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+real dt = 15, tend = dt*30;
+real t;
+for (int m=0;m<=tend/dt;m++) {
+
+
+  border B(t=0,2*pi) { x = ballstart[0]+0.2*cos(t); y = ballstart[1]+0.2*sin(t); label = Lball; }
+
+  macro bordersBall(n) B(n) // EOM
+  macro bordersNonball(n) S1(20) + S2(20) + S3(20) + S4(20)
+                     + S5(20) + S6a(20) + S6b(20) + S7a(20) + S7b(20) + S8(20) // EOM
+
+
+int ballref = 35;
+
+  mesh Ballh = buildmesh( B(ballref) );
+  mesh Frameh = buildmesh( S1(20) + S2(20) + S3(20) + S4(20)
+                     + S5(-20) + S6a(-20) + S6b(-20) + S7a(-20) + S7b(-20) + S8(-20) );
+  mesh Vach = buildmesh( S5(20) + S6a(20) + S6b(20) + S7a(20) + S7b(20) + S8(20) );
+
+  mesh Sh = buildmesh( S1(20) + S2(20) + S3(20) + S4(20)
+                     + S5(20) + S6a(20) + S6b(20) + S7a(20) + S7b(20) + S8(20) );
+
+  mesh Allh = buildmesh(bordersBall(ballref) + bordersNonball(30));
+//~   plot3d(Allh, "Allh");
+
+
+  //~ plot3d(Allh, "Allh");
+  //~ plot3d(Sh, "Sh");
+
+
+  
+  fespace Bh(Ballh,P2);
+
+
+  fespace Vh(Allh,P2);
+  
+  fespace Ph(Allh,P0);
+  Vh reg = region;
+  int rE  = reg(4,4);  // frame
+//~   int rE  = reg(4,4);  // frame
+  int rI  = reg(0,4);  // vacuum
+  int rB  = reg(ballstart[0],ballstart[1]);  // ball region
+
+  macro setEps(num) (reg==rE||reg==rB)*epsilon1[num] + (reg==rI)*epsilon2[num]  // EOM
+  Vh e11 = setEps(0);
+  Vh e12 = setEps(1);
+  Vh e13 = setEps(2);
+  Vh e21 = setEps(3);
+  Vh e22 = setEps(4);
+  Vh e23 = setEps(5);
+  Vh e31 = setEps(6);
+  Vh e32 = setEps(7);
+  Vh e33 = setEps(8);
+  plot3d(e11 , "");
+
+  //~ macro setEps2(num) (reg==rE||reg==rB)*epsilon1[num] + (reg==rI)*epsilon2[num];  // EOM
+  //~ for(int i = 0; i < 9; ++i) {
+  //~   epss[i] = setEps2(i);
+  //~   cout << epss[i] << endl;
+  //~ }
+
+  //~ Ph[int] eps(9);
+  //~ int tmp;
+  //~ func setEps2 = (reg==rE||reg==rB)*epsilon1[tmp] + (reg==rI)*epsilon2[tmp];
+  //~ tmp = 0; eps[0] = setEps2;
+  //~ plot(eps[0]);
+
+
+  Vh phi, w;
+
+
+  real phiCup = -2;
+  real phiCdown = 2;
+  real phiCleft = -42;
+  real phiCright = -42;
+  macro setPhiBound(label, value) on(label, phi=value)  // EOM
+
+  problem LaplaceVarf(phi,w,solver=CG) = int2d(Allh,qft=qf5pT)(
+              e11 * dx(phi)*dx(w)
+            + e12 * dx(phi)*dy(w)
+            + e21 * dy(phi)*dx(w)
+            + e22 * dy(phi)*dy(w))
+            + on(Lboxup,phi = phiCup)
+            + on(Lboxdown,phi = phiCdown)
+            ;
+  LaplaceVarf;
+
+
+  Vh Ex = dx(phi);
+  Vh Ey = dy(phi);
+  Vh Ez = dx(phi)*0;
+
+  // TODO: tensor this
+  Vh D1 = Ex * e11 + Ey * e12 + Ez * e13;
+  Vh D2 = Ex * e21 + Ey * e22 + Ez * e23;
+  Vh D3 = Ex * e31 + Ey * e32 + Ez * e33;
+  Vh T11 = - Ex * D1  + 0.5 * (Ex*D1 + Ey*D2 + Ez*D3);
+  Vh T22 = - Ey * D2  + 0.5 * (Ex*D1 + Ey*D2 + Ez*D3);
+  Vh T33 = - Ez * D3  + 0.5 * (Ex*D1 + Ey*D2 + Ez*D3);
+  Vh T12 = - Ex * D2;
+  Vh T21 = - Ey * D1;
+  Vh T13 = - Ex * D3;
+  Vh T23 = - Ex * D3;
+  Vh f1 = dx(T11)+dy(T21);
+  Vh f2 = dx(T21)+dy(T22);
+
+//~ D1 = Ex*e11; D2 = Ey * e22; D3 = Ez * e33;
+//~ T11 = 
+
+
+
+  Bh f2b = f2;
+  Bh phib = phi;
+//~   plot2d(f2b, "f2b");
+
+  border Benv(t=0,2*pi) { x = ballstart[0]+0.4*cos(t); y = ballstart[1]+0.4*sin(t); label = Lball; }
+  mesh Eh = buildmesh(Benv(ballref));
+  fespace Veh(Eh, P2);
+  Veh fbenv = f2;
+//~   plot2d(fbenv, int2d(Ballh)(f2) );
+Veh Exenv = Ex;
+//~   plot2d(Ex, "Ex" );
+
+
+  t += dt;
+
+//~   cout << f1 << endl;
+  // TODO: acceleration, inertia
+  ballstart[0] += int2d(Ballh) (f1) *dt;
+  ballstart[1] += int2d(Ballh) (f2) *dt;
+//~   cout << f1 << endl;
+
+//~   Allh = buildmesh(bordersBall(10) + bordersNonball(20));
+//~   plot3d(f2, "f2");
+  plot2d(phi, "phi");
+//~   plot2d(Allh, "mesh");
+//~   plot2d(f1, "forces");
+
+
+}
+

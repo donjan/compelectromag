@@ -6,7 +6,7 @@
 //cout<<"Not dumped 1"<<endl;
 
 macro borderline(a, b, lab) (t=0,1) { x = a[0]+t*(b[0]-a[0]); y = a[1]+t*(b[1]-a[1]); label = lab; } // EOM
-macro incidentWave(t,T,cc,theta) (1-x<t*cc?1.:0.)*sin(-2.*pi/(T*cc)*x - 2*pi/T*t) //EOM
+macro incidentWave(t,T,cc,theta) 0*(1-x<t*cc?1.:0.)*sin(-2.*pi/(T*cc)*x - 2*pi/T*t) //EOM
 macro vwave() 0*sin(2*pi*x)*cos(2*pi*y) //EOM
 macro uwave() 0*sin(3*pi*x)*cos(4*pi*y) //EOM
 macro Mvarf(multWith,uTrial,uTest) int2d(Th)(multWith*uTrial*uTest) //EOM

@@ -1,17 +1,33 @@
+/*******************************************************************************
+ * 
+ * Move a ball according to the stress tensor
+ * 
+ * Regions: ball, vacuum, frame
+ * Solve for E (phi) on union -> get stress
+ * Solve for movement on ball
+ * move ball
+ * Repeat (update union, keep track of regions)
+ * 
+ * TODO: define regions as a function of constants, then use adaptmesh
+ * 
+ ******************************************************************************/
 
-macro plot3d(obj, label) plot(obj, fill=true, value=true, ShowAxes=true, dim=3, wait=true, cmm = label); // EOM
+
+
+macro plot3d(obj, label) plot(obj, fill=true, value=true, ShowAxes=true, dim=3, cmm = label); // EOM
 
 macro borderline(a, b, lab) (t=0,1) { x = a[0]+t*(b[0]-a[0]); y = a[1]+t*(b[1]-a[1]); label = lab; } // EOM
 
+// border codes
 int ball = 101, boxo = 102, boxi = 103,
     Lboxdown = 104, Lboxright = 105, Lboxup = 106, Lboxleft = 107;
 
 real[int] ballstart(2);
 ballstart = [0., 1.];
 
+real e0 = 8.854187 *1;
 real[int]  epsilon1(9);
 real[int]  epsilon2(9);
-real e0 = 8.854187 *1;
 
 epsilon1 = [ 2.9*e0,      0,      0,
                   0, 2.9*e0,      0,
@@ -20,7 +36,6 @@ epsilon1 = [ 2.9*e0,      0,      0,
 epsilon2 = [ 1., 0, 0,
              0, 1., 0,
              0, 0, 1. ];
-
 
 
 border B(t=0,2*pi) { x = ballstart[0]+0.2*cos(t); y = ballstart[1]+0.2*sin(t); label = ball; }
@@ -39,19 +54,28 @@ border S7b borderline([2,4.9],   [-0.9,4.9], boxi)
 border S8 borderline([-0.9,4.9], [-0.9,0.1], boxi)
 
 
-mesh Bh = buildmesh( B(10) );
+macro bordersBall(n) B(n) // EOM
+macro bordersNonball(n) S1(20) + S2(20) + S3(20) + S4(20)
+                   + S5(20) + S6a(20) + S6b(20) + S7a(20) + S7b(20) + S8(20) // EOM
+
+
+mesh Ballh = buildmesh( B(10) );
+mesh Frameh = buildmesh( S1(20) + S2(20) + S3(20) + S4(20)
+                   + S5(-20) + S6a(-20) + S6b(-20) + S7a(-20) + S7b(-20) + S8(-20) );
+mesh Vach = buildmesh( S5(20) + S6a(20) + S6b(20) + S7a(20) + S7b(20) + S8(20) );
+
 mesh Sh = buildmesh( S1(20) + S2(20) + S3(20) + S4(20)
-//~                    + S5(-20) + S6a(-20) + S6b(-20) + S7a(-20) + S7b(-20) + S8(-20) );
                    + S5(20) + S6a(20) + S6b(20) + S7a(20) + S7b(20) + S8(20) );
 
-mesh Gh = Bh + Sh;
-//~ mesh Gh = buildmesh(  B(10)   + S1(20) + S2(20) + S3(20) + S4(20)
-//~                   + S5(20) + S6a(20) + S6b(20) + S7a(20) + S7b(20) + S8(20) );
-plot(Gh, value=true, ShowAxes=true, wait=true, cmm = "mesh");
-plot(Sh, value=true, ShowAxes=true, wait=true, cmm = "mesh");
-plot(stuff, value=true, ShowAxes=true, wait=true, cmm = "stuff mesh");
+mesh Allh = buildmesh(bordersBall(10) + bordersNonball(20));
+//~ plot3d(Allh, "Allh");
 
-fespace Ph(Gh,P0);
+
+//~ plot3d(Allh, "Allh");
+//~ plot3d(Sh, "Sh");
+
+
+fespace Ph(Allh,P0);
 Ph reg = region;
 int rE  = reg(4,4);  // frame
 int rI  = reg(0,4);  // vacuum
@@ -68,31 +92,87 @@ Ph e31 = setEps(6);
 Ph e32 = setEps(7);
 Ph e33 = setEps(8);
 
-//~ plot(e11, fill=true, value=true, dim=3, cmm = "e11");
-plot3d(e11, "e11");
+//~ macro setEps2(num) (reg==rE||reg==rB)*epsilon1[num] + (reg==rI)*epsilon2[num];  // EOM
+//~ for(int i = 0; i < 9; ++i) {
+//~   epss[i] = setEps2(i);
+//~   cout << epss[i] << endl;
+//~ }
 
 
-fespace Vh(Gh,P2);
+
+
+fespace Vh(Allh,P2);
 Vh phi, w;
 
-//~ problem LaplaceVarf(phi,w,solver=CG) = int2d(Gh)(
-problem LaplaceVarf(phi,w) = int2d(Gh)(
+
+real phiCup = -2; int phiCupB = 1;
+real phiCdown = 2;
+real phiCleft = -42;
+real phiCright = -42;
+
+real tgv = 1e10;
+varf LaplaceVarf2(phi,w) =
+	int2d(Allh)(
+            e11 * dx(phi)*dx(w)
+	  + e12 * dx(phi)*dy(w)
+	  + e21 * dy(phi)*dx(w)
+	  + e22 * dy(phi)*dy(w))
+      + int1d(Allh, Lboxup) ( w*tgv )
+      + int1d(Allh, Lboxdown) ( w*tgv )
+      ;
+  
+varf LaplaceVarf2RHS(phi, w) =
+      int1d(Allh, Lboxup) ( w*tgv*-2 )
+    + int1d(Allh, Lboxdown) ( w*tgv*2 );
+
+matrix L1 = LaplaceVarf2(Vh, Vh);
+//~ L1(
+//~ real[int] sol = LaplaceVarf2RHS(0, Vh);
+//~ cout << e11 << " "<< e12 << " "<< e13 << " "<< e21 << " "<< e22 << " " << endl;
+//~ cout << "________________________________" << endl;
+Vh ld;
+ld[] = LaplaceVarf2RHS(0, Vh);
+//~ cout << ld[] << endl;
+//~ cout << "________________________________" << endl;
+Vh sol;
+sol[] = L1^-1 * ld[];
+plot3d(sol, "sol");
+//~ cout << sol << endl; exit(0);
+
+
+
+// TODO: keep track of condition fo matrix
+
+//~ cout << sol << endl;
+//~ plot(sol[], wait=true);
+
+macro setPhiBound(label, value) on(label, phi=value)  // EOM
+//~ problem LaplaceVarf(phi,w,solver=CG) = int2d(Allh)(
+problem LaplaceVarf(phi,w) = int2d(Allh)(
+//~ varf LaplaceVarf(phi,w) = int2d(Allh)(
             e11 * dx(phi)*dx(w)
 					+ e12 * dx(phi)*dy(w)	    
 					+ e21 * dy(phi)*dx(w)
 					+ e22 * dy(phi)*dy(w))
-					+ on(Lboxdown,phi = 2)
-					+ on(Lboxup,phi = -2);
+					+ setPhiBound(Lboxup,phiCup)
+//~ 					+ on(Lboxup,phi = phiCup)
+					+ on(Lboxdown,phi = phiCdown)
+//~ 					+ on(Lboxleft,phi = phiCleft)
+//~ 					+ on(Lboxright,phi = phiCright)
+;
 LaplaceVarf;
-//~ plot(phi, fill=true, value=true, dim=3, cmm = "phi");
+plot3d(phi, "phi");
 
+
+exit(0);
 
 Vh Ex = dx(phi);
 Vh Ey = dy(phi);
 Vh Ez = dx(phi)*0;
-//~ plot(Ey, fill=true, value=true, dim=3, cmm = "Ey");
+//~ plot3d(Ey, "Ey");
 
 
+// TODO: tensor this
 Vh D1 = Ex * e11 + Ey * e12 + Ez * e13;
 Vh D2 = Ex * e21 + Ey * e22 + Ez * e23;
 Vh D3 = Ex * e31 + Ey * e32 + Ez * e33;
@@ -109,29 +189,48 @@ Vh f2 = dx(T21)+dy(T22);
 plot([f1,f2], cmm="forces");
 
 
-//~ real sqrt2=sqrt(2.);
-//~ macro epsilon(u1,u2)  [dx(u1),dy(u2),(dy(u1)+dx(u2))/sqrt2] // EOM
-//~ 
-//~ solve lame([u,v],[uu,vv])= int2d(Th)(
-//~         ((reg==1)?lambda1:lambda2)*div(u,v)*div(uu,vv)
-//~         +2.*((reg==1)?mu1:mu2)*( epsilon(u,v)'*epsilon(uu,vv) ) )
-//~        	- int2d(Th)(f1*uu)-int2d(Th)(f2*vv)
-//~         + on(7,u=0,v=0)+on(5,u=0,v=0);
+real sqrt2=sqrt(2.);
+macro epsilon(u1,u2)  [dx(u1),dy(u2),(dy(u1)+dx(u2))/sqrt2] // EOM
+macro div(u,v) ( dx(u)+dy(v) ) // EOM
+real EE1 = 2e1, nu1 = 0.25, mu1= EE1/(2*(1+nu1)); 
+real lambda1 = EE1*nu1/((1+nu1)*(1-2*nu1));
+real EE2 = 4e1, nu2 = 0.25, mu2= EE2/(2*(1+nu2));
+real lambda2 = EE2*nu2/((1+nu2)*(1-2*nu2));
+
+//~ solve lame([u,v],[uu,vv])= int2d(Ballh)(
+//~         ((reg==rB)?lambda1:lambda2)*div(u,v)*div(uu,vv)
+//~         +2.*((reg==rB)?mu1:mu2)*( epsilon(u,v)'*epsilon(uu,vv) ) )
+//~        	- int2d(Ballh)(f1*uu)-int2d(Ballh)(f2*vv)
+//~         + on(Lball,u=0,v=0)+on(Lball,u=0,v=0);
 
 
 
-//~ Bh = movemesh(Bh, [x+0.1*f1, y+0.1*f2]);
-//~ Gh = Bh + Sh;
-//~ plot(Gh, value=true, ShowAxes=true, cmm = "mesh2");
+//~ Ballh = movemesh(Ballh, [x+0.1*f1, y+0.1*f2]);
+//~ Allh = Ballh + Sh;
+//~ plot(Allh, value=true, ShowAxes=true, cmm = "mesh2");
 //~ exit(0);
 
-real dt = 0.1, tend = 3;
+//~ real dt = 0.1, tend = 3;
+real dt = 20, tend = dt*10;
 real t;
 for (int m=0;m<=tend/dt;m++) {
+
+
+  Allh = buildmesh(bordersBall(10) + bordersNonball(20));
+  LaplaceVarf;
+
+
   t += dt;
   f1 = dx(T11)+dy(T21);
   f2 = dx(T21)+dy(T22);
-//~   Bh = movemesh(Bh, [x+u, y+v]);
+
+  ballstart[0] += f1*dt;
+  ballstart[1] += f2*dt;
+  Allh = buildmesh(bordersBall(10) + bordersNonball(20));
+  plot3d(Allh, "Allh");
+
+
+//~   Ballh = movemesh(Ballh, [x+u, y+v]);
 
 }
 

@@ -121,6 +121,11 @@ plot([f1,f2], cmm="forces");
 
 real sqrt2=sqrt(2.);
 macro epsilon(u1,u2)  [dx(u1),dy(u2),(dy(u1)+dx(u2))/sqrt2] // EOM
+macro div(u,v) ( dx(u)+dy(v) ) // EOM
+real EE1 = 2e1, nu1 = 0.25, mu1= EE1/(2*(1+nu1)); 
+real lambda1 = EE1*nu1/((1+nu1)*(1-2*nu1));
+real EE2 = 4e1, nu2 = 0.25, mu2= EE2/(2*(1+nu2));
+real lambda2 = EE2*nu2/((1+nu2)*(1-2*nu2));
 
 solve lame([u,v],[uu,vv])= int2d(Bh)(
         ((reg==1)?lambda1:lambda2)*div(u,v)*div(uu,vv)
