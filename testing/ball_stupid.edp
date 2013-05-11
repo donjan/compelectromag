@@ -107,7 +107,9 @@ int ballref = 35;
   fespace Bh(Ballh,P2);
 
 
-  fespace Vh(Allh,P2);
+  fespace Vh(Allh,P1);
+  fespace VhDiff(Allh,P2);
+  
   
   fespace Ph(Allh,P0);
   Vh reg = region;
@@ -117,16 +119,16 @@ int ballref = 35;
   int rB  = reg(ballstart[0],ballstart[1]);  // ball region
 
   macro setEps(num) (reg==rE||reg==rB)*epsilon1[num] + (reg==rI)*epsilon2[num]  // EOM
-  Vh e11 = setEps(0);
-  Vh e12 = setEps(1);
-  Vh e13 = setEps(2);
-  Vh e21 = setEps(3);
-  Vh e22 = setEps(4);
-  Vh e23 = setEps(5);
-  Vh e31 = setEps(6);
-  Vh e32 = setEps(7);
-  Vh e33 = setEps(8);
-  plot3d(e11 , "");
+  Ph e11 = setEps(0);
+  Ph e12 = setEps(1);
+  Ph e13 = setEps(2);
+  Ph e21 = setEps(3);
+  Ph e22 = setEps(4);
+  Ph e23 = setEps(5);
+  Ph e31 = setEps(6);
+  Ph e32 = setEps(7);
+  Ph e33 = setEps(8);
+  //~ plot3d(e11 , "");
 
   //~ macro setEps2(num) (reg==rE||reg==rB)*epsilon1[num] + (reg==rI)*epsilon2[num];  // EOM
   //~ for(int i = 0; i < 9; ++i) {
@@ -142,7 +144,7 @@ int ballref = 35;
 
 
   Vh phi, w;
-
+  
 
   real phiCup = -2;
   real phiCdown = 2;
@@ -160,25 +162,30 @@ int ballref = 35;
             ;
   LaplaceVarf;
 
+  VhDiff phiDiff;
+  phiDiff = phi; //For differentiating somthing smoother...
 
-  Vh Ex = dx(phi);
-  Vh Ey = dy(phi);
-  Vh Ez = dx(phi)*0;
+  VhDiff Ex = dx(phiDiff);
+  VhDiff Ey = dy(phiDiff);
+  VhDiff Ez = dx(phiDiff)*0;
 
   // TODO: tensor this
-  Vh D1 = Ex * e11 + Ey * e12 + Ez * e13;
-  Vh D2 = Ex * e21 + Ey * e22 + Ez * e23;
-  Vh D3 = Ex * e31 + Ey * e32 + Ez * e33;
-  Vh T11 = - Ex * D1  + 0.5 * (Ex*D1 + Ey*D2 + Ez*D3);
-  Vh T22 = - Ey * D2  + 0.5 * (Ex*D1 + Ey*D2 + Ez*D3);
-  Vh T33 = - Ez * D3  + 0.5 * (Ex*D1 + Ey*D2 + Ez*D3);
-  Vh T12 = - Ex * D2;
-  Vh T21 = - Ey * D1;
-  Vh T13 = - Ex * D3;
-  Vh T23 = - Ex * D3;
-  Vh f1 = dx(T11)+dy(T21);
-  Vh f2 = dx(T21)+dy(T22);
-
+  VhDiff D1 = Ex * e11 + Ey * e12 + Ez * e13;
+  VhDiff D2 = Ex * e21 + Ey * e22 + Ez * e23;
+  VhDiff D3 = Ex * e31 + Ey * e32 + Ez * e33;
+  VhDiff T11 = - Ex * D1  + 0.5 * (Ex*D1 + Ey*D2 + Ez*D3);
+  VhDiff T22 = - Ey * D2  + 0.5 * (Ex*D1 + Ey*D2 + Ez*D3);
+  VhDiff T33 = - Ez * D3  + 0.5 * (Ex*D1 + Ey*D2 + Ez*D3);
+  VhDiff T12 = - Ex * D2;
+  VhDiff T21 = - Ey * D1;
+  VhDiff T13 = - Ex * D3;
+  VhDiff T23 = - Ex * D3;
+  VhDiff f1 = T11;
+  VhDiff f2 = T12;
+	plot(T11,wait=true,cmm="f11");
+	plot(T12,wait=true,cmm="f12");
+	plot(T22,wait=true,cmm="f22");
+	
 //~ D1 = Ex*e11; D2 = Ey * e22; D3 = Ez * e33;
 //~ T11 = 
 
@@ -195,7 +202,7 @@ int ballref = 35;
 //~   plot2d(fbenv, int2d(Ballh)(f2) );
 Veh Exenv = Ex;
 //~   plot2d(Ex, "Ex" );
-
+	plot2d(fbenv,"please work properly");
 
   t += dt;
 
@@ -207,7 +214,7 @@ Veh Exenv = Ex;
 
 //~   Allh = buildmesh(bordersBall(10) + bordersNonball(20));
 //~   plot3d(f2, "f2");
-  plot2d(phi, "phi");
+  //~ plot2d(phi, "phi");
 //~   plot2d(Allh, "mesh");
 //~   plot2d(f1, "forces");
 
