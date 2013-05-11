@@ -73,12 +73,12 @@ border S8 borderline([-0.9,4.9], [-0.9,0.1], Lboxi)
 
 
 
-real dt = 15, tend = dt*30;
+real dt = 0.1, tend = dt*30;
 real t;
 for (int m=0;m<=tend/dt;m++) {
 
-
-  border B(t=0,2*pi) { x = ballstart[0]+0.2*cos(t); y = ballstart[1]+0.2*sin(t); label = Lball; }
+real ballr = 0.5;
+  border B(t=0,2*pi) { x = ballstart[0]+ballr*cos(t); y = ballstart[1]+ballr*sin(t); label = Lball; }
 
   macro bordersBall(n) B(n) // EOM
   macro bordersNonball(n) S1(20) + S2(20) + S3(20) + S4(20)
@@ -148,6 +148,9 @@ int ballref = 25;
 
   real phiCup = -2;
   real phiCdown = 2;
+
+if(t > tend/3) { phiCup = 2; phiCdown = -2; }
+
   real phiCleft = -42;
   real phiCright = -42;
   macro setPhiBound(label, value) on(label, phi=value)  // EOM
@@ -165,28 +168,39 @@ int ballref = 25;
 
   Vh Ex = dx(phi);
   Vh Ey = dy(phi);
-  Vh Ez = dx(phi)*0;
+  Vh Ez = dx(phi);
 
   // TODO: tensor this
   Vh D1 = Ex * e11 + Ey * e12 + Ez * e13;
   Vh D2 = Ex * e21 + Ey * e22 + Ez * e23;
   Vh D3 = Ex * e31 + Ey * e32 + Ez * e33;
-  Vh T11 = - Ex * D1  + 0.5 * (Ex*D1 + Ey*D2 + Ez*D3);
+  Vh T11 = Ex * D1  + 0.5 * (Ex*D1 + Ey*D2 + Ez*D3);
   Vh T22 = - Ey * D2  + 0.5 * (Ex*D1 + Ey*D2 + Ez*D3);
   Vh T33 = - Ez * D3  + 0.5 * (Ex*D1 + Ey*D2 + Ez*D3);
-  Vh T12 = - Ex * D2;
+  Vh T12 = - Ex * D2;  // probably problematic
   Vh T21 = - Ey * D1;
   Vh T13 = - Ex * D3;
   Vh T23 = - Ex * D3;
 //~ T11 = -T11; T12 = -T12; T21 = -T21; T22 = -T22;
-  Vh f1 = dx(T11)+dy(T21);
-  Vh f2 = dx(T21)+dy(T22);
+//~   Vh f1 = dx(T11)+dy(T21);  // should be ~0
+//~   Vh f2 = dx(T12)+dy(T22);
+
+//~ dyExEx = dy(Ex*Ex*e11);
+
+//~   Vh f1 = dx(T11)+ dy( -Ey * (Ex*e11 + Ey*e12 + Ez*e13) );
+//~   Vh f1 = dx(T11) - dy(Ey*Ex*e11) - dy(Ey*Ey*e12) - dy(Ey*Ez*e13);
+//~   Vh f1 = dx(T11) - e11*(dy(Ey)*Ex+Ey*dy(Ex)) - e12*(dy(Ey)*Ey+Ey*dy(Ey)) - e13*(dy(Ey)*Ez+Ey*dy(Ez));
+  Vh f1 = dx(T11) - e11*(dyy(phi)*Ex+Ey*dyx(phi)) - e12*(2*dyy(phi)*Ey);
+
+//~   Vh f2 = dx(T12)+dy(T22);
+  Vh f2 = - e11*(2*dxx(phi)*Ex) - e12*(dxx(phi)*Ey+Ex*dxy(phi)) + dy(T22);
+
 
 //~ D1 = Ex*e11; D2 = Ey * e22; D3 = Ez * e33;
-T11 = Ex*D1 - 0.5 * (Ex*D1  );  T12 = Ex*D2;
-T22 = Ey*D2 - 0.5 * (Ey*D2  );  T21 = Ey*D1;
-f1 = T11;
-f2 = T22;
+//~ T11 = Ex*D1 - 0.5 * (Ex*D1  );  T12 = Ex*D2;
+//~ T22 = Ey*D2 - 0.5 * (Ey*D2  );  T21 = Ey*D1;
+//~ f1 = T11;
+//~ f2 = T22;
 //~ f1 = dx(T11)+dy(T12);
 //~ f2 = dx(T22)+dy(T21);
 
@@ -200,7 +214,7 @@ f2 = T22;
   Bh phib = phi;
 //~   plot2d(f2b, "f2b");
 
-  border Benv(t=0,2*pi) { x = ballstart[0]+0.4*cos(t); y = ballstart[1]+0.4*sin(t); label = Lball; }
+  border Benv(t=0,2*pi) { x = ballstart[0]+2*ballr*cos(t); y = ballstart[1]+2*ballr*sin(t); label = Lball; }
   mesh Eh = buildmesh(Benv(2*ballref));
 //~ plot2d(Eh, "env mesh");
   fespace Veh(Eh, P2);
@@ -208,6 +222,9 @@ f2 = T22;
   Veh Eyenv = Ey;
 
 //~   plot2d([Exenv, Eyenv], "Ex" );
+  Veh T11env = T11;
+  Veh T22env = T22;
+//~   plot2d([T11env, T22env], "tensor elements" );
   Veh f1env = f1;
   Veh f2env = f2;
   plot2d([f1env, f2env], int2d(Ballh)(f2) );
@@ -219,15 +236,15 @@ Veh phienv = phi;
 
 //~   cout << f1 << endl;
   // TODO: acceleration, inertia
-  ballstart[0] += int2d(Ballh) (f1) *dt;
-  ballstart[1] += int2d(Ballh) (f2) *dt;
+  ballstart[0] += int1d(Ballh, Lball) (f1) *dt;
+  ballstart[1] += int1d(Ballh, Lball) (f2) *dt;
 //~   cout << f1 << endl;
 
 //~   Allh = buildmesh(bordersBall(10) + bordersNonball(20));
 //~   plot3d(f2, "f2");
 //~   plot2d(phi, "phi");
 //~   plot2d(Allh, "mesh");
-//~   plot2d(f1, "forces");
+//~   plot2d([f1, f2], "forces");
 
 
 }
