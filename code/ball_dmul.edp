@@ -60,7 +60,8 @@ ballv = [0, 0];
 // Border construction
 
 int Lball = 101, Lboxo = 102, Lboxi = 103,
-    Lboxdown = 104, Lboxright = 105, Lboxup = 106, Lboxleft = 107;
+    Lboxdown = 104, Lboxright = 105, Lboxup = 106, Lboxleft = 107,
+    Lballenv = 108;
 
 borderLineCycle4([-1,0], Bod, Lboxdown,
                  [ 5,0], Bor, Lboxright,
@@ -105,8 +106,8 @@ macro dotp(a, b)
 
 
 ////////////////////////////////////////////////////////////////////////////////
-
-for(real t=0; t < tend; t+=dt) {
+ofstream of("forces"); 
+for(real tau=0; tau < tend; tau+=dt) {
 
   // Build meshes
 
@@ -133,7 +134,7 @@ for(real t=0; t < tend; t+=dt) {
   fespace Vh(Allh,P2);
   Vh phi, w;
 
-  if(abs(t-switchtime)<dt/2) {
+  if(abs(tau-switchtime)<dt/2) {
     real tmp = phiCup; phiCup = phiCdown; phiCdown = tmp;
   }
 
@@ -167,15 +168,16 @@ for(real t=0; t < tend; t+=dt) {
   // Calculate the forces and apply collapsed Velocity Verlet on ball position
   // TODO: derivation in formulas.lyx
 
-  Vh fx = dx(T[0]) - EPS[0][0]*(dyy(phi)*E[0]+E[1]*dyx(phi)) - EPS[0][1]*(2*dyy(phi)*E[1]);
+  Vh fx = dx(T[0]) - EPS[1][0]*(dyy(phi)*E[0]+E[1]*dyx(phi)) - EPS[1][1]*(2*dyy(phi)*E[1]);
   Vh fy = - EPS[0][0]*(2*dxx(phi)*E[0]) - EPS[0][1]*(dxx(phi)*E[1]+E[0]*dxy(phi)) + dy(T[4]);
 
-  ballv[0] += int2d(Ballh) (fx) * dt / 1.;             // ball mass := 1
-  ballpos[0] = 2*ballpos[0] - ballposold[0] + dt*ballv[0];
-  ballv[1] += int2d(Ballh) (fy) * dt / 1.;             // ball mass := 1
-  ballpos[1] = 2*ballpos[1] - ballposold[1] + dt*ballv[1];
+  real Fx = int1d(Ballh, Lball) (-fx*N.x);
+  real Fy = int1d(Ballh, Lball) (-fy*N.y);
 
-  ballposold = ballpos;
+  ballv[0] += Fx * dt / 1.;                           // ball mass := 1
+  ballpos[0] = 2*ballpos[0] - ballposold[0] + dt*ballv[0];
+  ballv[1] += Fy * dt / 1.;                           // ball mass := 1
+  ballpos[1] = 2*ballpos[1] - ballposold[1] + dt*ballv[1];
 
 
   // Plotting
@@ -188,7 +190,7 @@ for(real t=0; t < tend; t+=dt) {
 //~   plot2d(T[1], "T12");
 //~   plot2d(T[3], "T21");
 //~   plot2d(T[4], "T22");
-//~   plot2d([fx, fy], "force field, int(x): " + int2d(Ballh)(fx) + ", int(y): " + int2d(Ballh)(fy));
+//~   plot2d([fx, fy], "force field, Fx: " + Fx + ", Fy: " + Fy);
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -196,7 +198,7 @@ for(real t=0; t < tend; t+=dt) {
   macro plotenv(tmp, v, lab) Venvh tmp = v; plot2d(tmp, lab); // EOM
   macro plotenv2(t1, t2, v1, v2, lab) Venvh t1=v1; Venvh t2=v2; plot2d([t1,t2], lab); // EOM
 
-  border Benv(t=0,2*pi) { x = ballpos[0]+2*ballr*cos(t); y = ballpos[1]+2*ballr*sin(t); label = Lball; }
+  border Benv(t=0,2*pi) { x = ballposold[0]+2*ballr*cos(t); y = ballposold[1]+2*ballr*sin(t); label = Lballenv; }
   mesh Envh = buildmesh(Benv(3*ballh));
   fespace Venvh(Envh, P2);
 //~   plot2d(Envh, "env mesh");
@@ -214,7 +216,10 @@ for(real t=0; t < tend; t+=dt) {
 //~   plotenv(edxT12, dx(T[1]), "dx(T12)");
 //~   plotenv(edyT12, dy(T[1]), "dy(T12)");
 
-//~   plotenv2(efx, efy, fx, fy, "force field, int(x): " + int2d(Ballh)(fx) + ", int(y): " + int2d(Ballh)(fy));
+//~   plotenv2(efx, efy, fx, fy, "t=" + tau + ", force field, Fx: " + Fx + ", Fy: " + Fy);
+//~   of << tau << "  " << Fx << "  " << Fy << endl;
 ////////////////////////////////////////////////////////////////////////////////
+
+  ballposold = ballpos;
 
 }
