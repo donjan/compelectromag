@@ -61,20 +61,21 @@ ballv = [0, 0];
 int Lball = 101, Lboxo = 102, Lboxi = 103,
     Lboxdown = 104, Lboxright = 105, Lboxup = 106, Lboxleft = 107;
 
-borderLineCycle4(S1, [-1,0], Lboxdown,
-                 S2, [ 5,0], Lboxright,
-                 S3, [ 5,5], Lboxup,
-                 S4, [-1,5], Lboxleft)
+borderLineCycle4([-1,0], Bod, Lboxdown,
+                 [ 5,0], Bor, Lboxright,
+                 [ 5,5], Bou, Lboxup,
+                 [-1,5], Bol, Lboxleft)
 
-borderLineCycle6(S5,  [-0.9, 0.1], Lboxi,
-                 S6a, [ 4.9, 0.1], Lboxi,
-                 S6b, [ 4.9, 3.1], Lboxi,
-                 S7a, [ 2  , 3.1], Lboxi,
-                 S7b, [ 2  , 4.9], Lboxi,
-                 S8,  [-0.9, 4.9], Lboxi)
+borderLineCycle7([-0.9, 0.1], Bid,  Lboxi,
+                 [ 4.9, 0.1], Bir,  Lboxi,
+                 [ 4.9, 3.1], Bii1, Lboxi,
+                 [ 3.5, 3.1], Bii2, Lboxi,
+                 [ 2  , 4  ], Bii3, Lboxi,
+                 [ 2  , 4.9], Biu,  Lboxi,
+                 [-0.9, 4.9], Bil,  Lboxi)
 
-macro bordersNonball(n) S1(n) + S2(n) + S3(n) + S4(n)
-  + S5(n) + S6a(n) + S6b(n/2) + S7a(n/3) + S7b(n) + S8(n) // EOM
+macro bordersNonball(n) Bod(n) + Bor(n) + Bou(n) + Bol(n)
+  + Bid(n) + Bir(n) + Bii1(n/3) + Bii2(n/3) + Bii3(n/3) + Biu(n) + Bil(n) // EOM
 
 border B(t=0,2*pi) {
   x = ballpos[0]+ballr*cos(t);
@@ -208,8 +209,7 @@ for(real t=0; t < tend; t+=dt) {
 //~   plotenv(edT22, dy(T[4]), "dy(T22)");
 
 //~   plotenv(eT12, T[1], "T12 == T21");
-//~   Vh dT12 = dx(T[1]);
-//~   plotenv(edxT12, dT12, "dx(T12)");
+//~   plotenv(edxT12, dx(T[1]), "dx(T12)");
 //~   plotenv(edyT12, dy(T[1]), "dy(T12)");
 
 //~   plotenv2(efx, efy, fx, fy, "force field, int(x): " + int2d(Ballh)(fx) + ", int(y): " + int2d(Ballh)(fy));
