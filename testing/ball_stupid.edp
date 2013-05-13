@@ -12,22 +12,13 @@
  * 
  ******************************************************************************/
 
-
+include "borders.idp"
 
 macro plot3d(obj, label) plot(obj, fill=true, value=true, ShowAxes=true, dim=3, wait=true, cmm = label); // EOM
 macro plot2d(obj, label) plot(obj, fill=true, value=true, ShowAxes=true, dim=2, wait=true, cmm = label); // EOM
 
-macro borderline(a, b, lab) (t=0,1) { x = a[0]+t*(b[0]-a[0]); y = a[1]+t*(b[1]-a[1]); label = lab; } // EOM
 
-
-
-
-// border codes
-int Lball = 101, Lboxo = 102, Lboxi = 103,
-    Lboxdown = 104, Lboxright = 105, Lboxup = 106, Lboxleft = 107;
-
-real[int] ballstart(2);
-ballstart = [0., 1.];
+// Material parameters
 
 real e0 = 8.854187 *1;
 real[int] epsilon1(9);
@@ -42,83 +33,64 @@ epsilon2 = [ 1.*e0, 0, 0,
              0, 0, 1.*e0 ];
 
 
+// Geometry parameters
+
+real[int] ballstart(2);
+ballstart = [0., 1.];
+real ballr = 0.5;
+int ballh = 25;
+int frameh = 30;
 
 
-border S1 borderline([-1,0], [5,0],  Lboxdown)
-border S2 borderline([5,0],  [5,5],  Lboxright)
-border S3 borderline([5,5],  [-1,5], Lboxup)
-border S4 borderline([-1,5], [-1,0], Lboxleft)
+// Simulation parameters
 
-//~ borderchain(S1, [-1,0], Lboxdown,
-//~             S2, [ 5,0], Lboxright,
-//~             S3, [ 5,5], Lboxup,
-//~             S4, [-1,5], Lboxleft)
+real dt = 0.1;
+real tend = dt*30;
+real switchtime = tend/2;
+real phiCup = -2;   // constrain phi on upper border
+real phiCdown = 2;  // constrain phi on lower border
 
-//~ border S5 borderline([-0.9,0.1], [4.9,0.1],  Lboxi)
-//~ border S6a borderline([4.9,0.1], [4.9,2],    Lboxi)
-//~ border S6b borderline([4.9,2],   [2,2],      Lboxi)
-//~ border S7a borderline([2,2],     [2,4.9],    Lboxi)
-//~ border S7b borderline([2,4.9],   [-0.9,4.9], Lboxi)
-//~ border S8 borderline([-0.9,4.9], [-0.9,0.1], Lboxi)
-border S5 borderline([-0.9,0.1], [4.9,0.1],  Lboxi)
-border S6a borderline([4.9,0.1], [4.9,3.8],    Lboxi)
-border S6b borderline([4.9,3.8],   [2,3.8],      Lboxi)
-border S7a borderline([2,3.8],     [2,4.9],    Lboxi)
-border S7b borderline([2,4.9],   [-0.9,4.9], Lboxi)
-border S8 borderline([-0.9,4.9], [-0.9,0.1], Lboxi)
 
+// Border construction
+
+int Lball = 101, Lboxo = 102, Lboxi = 103,
+    Lboxdown = 104, Lboxright = 105, Lboxup = 106, Lboxleft = 107;
+
+borderLineCycle4(S1, [-1,0], Lboxdown,
+                 S2, [ 5,0], Lboxright,
+                 S3, [ 5,5], Lboxup,
+                 S4, [-1,5], Lboxleft)
+
+borderLineCycle6(S5,  [-0.9,0.1], Lboxi,
+                 S6a, [ 4.9,0.1], Lboxi,
+                 S6b, [ 4.9,3.8], Lboxi,
+                 S7a, [ 2  ,3.8], Lboxi,
+                 S7b, [ 2  ,4.9], Lboxi,
+                 S8,  [-0.9,4.9], Lboxi)
+
+macro bordersNonball(n) S1(n) + S2(n) + S3(n) + S4(n)
+  + S5(n) + S6a(n) + S6b(n) + S7a(n) + S7b(n) + S8(n) // EOM
+
+border B(t=0,2*pi) {
+  x = ballstart[0]+ballr*cos(t);
+  y = ballstart[1]+ballr*sin(t);
+  label = Lball;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 
+for(real t=0; t < tend; t+=dt) {
 
+  mesh Ballh = buildmesh( B(ballh) );
+  mesh Allh = buildmesh( B(ballh) + bordersNonball(frameh));
 
-
-real dt = 0.1, tend = dt*30;
-real t;
-for (int m=0;m<=tend/dt;m++) {
-
-real ballr = 0.5;
-  border B(t=0,2*pi) { x = ballstart[0]+ballr*cos(t); y = ballstart[1]+ballr*sin(t); label = Lball; }
-
-  macro bordersBall(n) B(n) // EOM
-  macro bordersNonball(n) S1(20) + S2(20) + S3(20) + S4(20)
-                     + S5(20) + S6a(20) + S6b(20) + S7a(20) + S7b(20) + S8(20) // EOM
-
-
-int ballref = 25;
-
-  mesh Ballh = buildmesh( B(ballref) );
-  mesh Frameh = buildmesh( S1(20) + S2(20) + S3(20) + S4(20)
-                     + S5(-20) + S6a(-20) + S6b(-20) + S7a(-20) + S7b(-20) + S8(-20) );
-  mesh Vach = buildmesh( S5(20) + S6a(20) + S6b(20) + S7a(20) + S7b(20) + S8(20) );
-
-  mesh Sh = buildmesh( S1(20) + S2(20) + S3(20) + S4(20)
-                     + S5(20) + S6a(20) + S6b(20) + S7a(20) + S7b(20) + S8(20) );
-
-  mesh Allh = buildmesh(bordersBall(ballref) + bordersNonball(50));
-//~   plot3d(Allh, "Allh");
-
-
-  //~ plot3d(Allh, "Allh");
-  //~ plot3d(Sh, "Sh");
-
-
-  
-  fespace Bh(Ballh,P2);
-
-
-  fespace Vh(Allh,P2);
-//~   fespace Vh(Allh,P1);
-  
   fespace Ph(Allh,P0);
   Ph reg = region;
   int rE  = reg(4,4);  // frame
-//~   int rE  = reg(4,4);  // frame
   int rI  = reg(0,4);  // vacuum
   int rB  = reg(ballstart[0],ballstart[1]);  // ball region
 
   macro setEps(num) (reg==rE||reg==rB)*epsilon1[num] + (reg==rI)*epsilon2[num]  // EOM
-//~   macro setEps(num) (reg==rE)*epsilon1[num] + (reg==rI||reg==rB)*epsilon2[num]  // EOM
   Ph e11 = setEps(0);
   Ph e12 = setEps(1);
   Ph e13 = setEps(2);
@@ -130,39 +102,23 @@ int ballref = 25;
   Ph e33 = setEps(8);
 //~   plot3d(e11 , "");
 
-  //~ macro setEps2(num) (reg==rE||reg==rB)*epsilon1[num] + (reg==rI)*epsilon2[num];  // EOM
-  //~ for(int i = 0; i < 9; ++i) {
-  //~   epss[i] = setEps2(i);
-  //~   cout << epss[i] << endl;
-  //~ }
-
-  //~ Ph[int] eps(9);
-  //~ int tmp;
-  //~ func setEps2 = (reg==rE||reg==rB)*epsilon1[tmp] + (reg==rI)*epsilon2[tmp];
-  //~ tmp = 0; eps[0] = setEps2;
-  //~ plot(eps[0]);
 
 
+  fespace Vh(Allh,P2);
   Vh phi, w;
 
-
-  real phiCup = -2;
-  real phiCdown = 2;
-
-if(t > tend/3) { phiCup = 2; phiCdown = -2; }
-
-  real phiCleft = -42;
-  real phiCright = -42;
-  macro setPhiBound(label, value) on(label, phi=value)  // EOM
+  if(abs(t-switchtime)<dt/2) {
+    real tmp = phiCup; phiCup = phiCdown; phiCdown = tmp;
+  }
 
   problem LaplaceVarf(phi,w,solver=CG) = int2d(Allh,qft=qf5pT)(
-              e11 * dx(phi)*dx(w)
-            + e12 * dx(phi)*dy(w)
-            + e21 * dy(phi)*dx(w)
-            + e22 * dy(phi)*dy(w))
-            + on(Lboxup,phi = phiCup)
-            + on(Lboxdown,phi = phiCdown)
-            ;
+      e11 * dx(phi)*dx(w)
+    + e12 * dx(phi)*dy(w)
+    + e21 * dy(phi)*dx(w)
+    + e22 * dy(phi)*dy(w))
+    + on(Lboxup,phi = phiCup)
+    + on(Lboxdown,phi = phiCdown)
+    ;
   LaplaceVarf;
 
 
@@ -174,7 +130,7 @@ if(t > tend/3) { phiCup = 2; phiCdown = -2; }
   Vh D1 = Ex * e11 + Ey * e12 + Ez * e13;
   Vh D2 = Ex * e21 + Ey * e22 + Ez * e23;
   Vh D3 = Ex * e31 + Ey * e32 + Ez * e33;
-  Vh T11 = Ex * D1  + 0.5 * (Ex*D1 + Ey*D2 + Ez*D3);
+  Vh T11 = - Ex * D1  + 0.5 * (Ex*D1 + Ey*D2 + Ez*D3);
   Vh T22 = - Ey * D2  + 0.5 * (Ex*D1 + Ey*D2 + Ez*D3);
   Vh T33 = - Ez * D3  + 0.5 * (Ex*D1 + Ey*D2 + Ez*D3);
   Vh T12 = - Ex * D2;  // probably problematic
@@ -182,11 +138,10 @@ if(t > tend/3) { phiCup = 2; phiCdown = -2; }
   Vh T13 = - Ex * D3;
   Vh T23 = - Ex * D3;
 //~ T11 = -T11; T12 = -T12; T21 = -T21; T22 = -T22;
+
+
+// Take multiplication of derivatives
 //~   Vh f1 = dx(T11)+dy(T21);  // should be ~0
-//~   Vh f2 = dx(T12)+dy(T22);
-
-//~ dyExEx = dy(Ex*Ex*e11);
-
 //~   Vh f1 = dx(T11)+ dy( -Ey * (Ex*e11 + Ey*e12 + Ez*e13) );
 //~   Vh f1 = dx(T11) - dy(Ey*Ex*e11) - dy(Ey*Ey*e12) - dy(Ey*Ez*e13);
 //~   Vh f1 = dx(T11) - e11*(dy(Ey)*Ex+Ey*dy(Ex)) - e12*(dy(Ey)*Ey+Ey*dy(Ey)) - e13*(dy(Ey)*Ez+Ey*dy(Ez));
@@ -196,6 +151,8 @@ if(t > tend/3) { phiCup = 2; phiCdown = -2; }
   Vh f2 = - e11*(2*dxx(phi)*Ex) - e12*(dxx(phi)*Ey+Ex*dxy(phi)) + dy(T22);
 
 
+
+// wiki version:
 //~ D1 = Ex*e11; D2 = Ey * e22; D3 = Ez * e33;
 //~ T11 = Ex*D1 - 0.5 * (Ex*D1  );  T12 = Ex*D2;
 //~ T22 = Ey*D2 - 0.5 * (Ey*D2  );  T21 = Ey*D1;
@@ -210,42 +167,40 @@ if(t > tend/3) { phiCup = 2; phiCdown = -2; }
 
 
 
-  Bh f2b = f2;
-  Bh phib = phi;
-//~   plot2d(f2b, "f2b");
-
-  border Benv(t=0,2*pi) { x = ballstart[0]+2*ballr*cos(t); y = ballstart[1]+2*ballr*sin(t); label = Lball; }
-  mesh Eh = buildmesh(Benv(2*ballref));
-//~ plot2d(Eh, "env mesh");
-  fespace Veh(Eh, P2);
-  Veh Exenv = Ex;
-  Veh Eyenv = Ey;
-
-//~   plot2d([Exenv, Eyenv], "Ex" );
-  Veh T11env = T11;
-  Veh T22env = T22;
-//~   plot2d([T11env, T22env], "tensor elements" );
-  Veh f1env = f1;
-  Veh f2env = f2;
-  plot2d([f1env, f2env], int2d(Ballh)(f2) );
-Veh phienv = phi;
-//~   plot2d(phienv, "phi" );
-
-
-  t += dt;
-
-//~   cout << f1 << endl;
-  // TODO: acceleration, inertia
+  // TODO: acceleration, inertia (verlet?)
   ballstart[0] += int1d(Ballh, Lball) (f1) *dt;
   ballstart[1] += int1d(Ballh, Lball) (f2) *dt;
-//~   cout << f1 << endl;
 
-//~   Allh = buildmesh(bordersBall(10) + bordersNonball(20));
-//~   plot3d(f2, "f2");
 //~   plot2d(phi, "phi");
 //~   plot2d(Allh, "mesh");
-//~   plot2d([f1, f2], "forces");
+//~   plot2d([f1, f2], "force field, ball total: " + int2d(Ballh)(f2));
 
 
+
+////////////////////////////////////////////////////////////////////////////////
+// Plotting environment
+  macro plotenv(v, lab) Venvh e#v = v; plot2d(e#v, lab); // EOM
+  macro plotenv2(v1, v2, lab) Venvh e#v1=v1; Venvh e#v2=v2; plot2d([e#v1,e#v2], lab); // EOM
+
+  border Benv(t=0,2*pi) { x = ballstart[0]+2*ballr*cos(t); y = ballstart[1]+2*ballr*sin(t); label = Lball; }
+  mesh Envh = buildmesh(Benv(3*ballh));
+  fespace Venvh(Envh, P2);
+//~   plot2d(Envh, "env mesh");
+
+//~   plotenv(phi, "phi");
+//~   plotenv2(Ex,Ey, "E field");
+//~   plotenv2(D1,D2, "D field");
+//~ 
+//~   plotenv(T11, "T11");
+//~   Vh dxT11 = dx(T11); plotenv(dxT11, "dx(T11)");
+//~   plotenv(T22, "T22");
+//~   Vh dyT22 = dy(T22); plotenv(dyT22, "dy(T22)");
+//~ 
+//~   plotenv(T12, "T12 == T21");
+//~   Vh dxT12 = dx(T12); plotenv(dxT12, "dx(T12)");
+//~   Vh dyT12 = dy(T12); plotenv(dyT12, "dy(T12)");
+//~ 
+//~   plotenv2(f1,f2, "force field, int(x): " + int2d(Ballh)(f1) + ", int(y): " + int2d(Ballh)(f2));
+////////////////////////////////////////////////////////////////////////////////
 }
 
