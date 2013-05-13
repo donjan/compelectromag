@@ -168,9 +168,9 @@ for(real t=0; t < tend; t+=dt) {
   Vh fx = dx(T[0])+dy(T[3]);                          // should be ~0
   Vh fy = dx(T[1])+dy(T[4]);
 
-  ballv[0] += int1d(Ballh, Lball) (fx) * dt / 1.;             // ball mass := 1
+  ballv[0] += int2d(Ballh) (fx) * dt / 1.;             // ball mass := 1
   ballpos[0] = 2*ballpos[0] - ballposold[0] + dt*ballv[0];
-  ballv[1] += int1d(Ballh, Lball) (fy) * dt / 1.;             // ball mass := 1
+  ballv[1] += int2d(Ballh) (fy) * dt / 1.;             // ball mass := 1
   ballpos[1] = 2*ballpos[1] - ballposold[1] + dt*ballv[1];
 
   ballposold = ballpos;
@@ -180,7 +180,7 @@ for(real t=0; t < tend; t+=dt) {
 
 //~   plot2d(Allh, "mesh");
 //~   Ph eps00 = EPS[0][0]; plot3d(eps00, "eps00");
-//~   plot2d(phi, "phi");
+  plot2d(phi, "phi");
 //~   plot2d([D[0], D[1]], "D field");
 //~   plot2d(T[0], "T11");
 //~   plot2d(T[1], "T12");
@@ -210,9 +210,9 @@ for(real t=0; t < tend; t+=dt) {
 
 //~   plotenv(eT12, T[1], "T12 == T21");
 //~   plotenv(edxT12, dx(T[1]), "dx(T12)");
-//~   plotenv(edyT12, dy(T[3]), "dy(T12)");
+//~   plotenv(edyT12, dy(T[1]), "dy(T12)");
 
-//~   plotenv2(efx, efy, fx,  fy, "force field, int(x): " + int2d(Ballh)(fx) + ", int(y): " + int2d(Ballh)(fy));
+//~   plotenv2(efx, efy, fx, fy, "force field, int(x): " + int2d(Ballh)(fx) + ", int(y): " + int2d(Ballh)(fy));
 ////////////////////////////////////////////////////////////////////////////////
 
 }
