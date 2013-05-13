@@ -153,7 +153,7 @@ for(real t=0; t < tend; t+=dt) {
 
   // Calculate the stress tensor
 
-  func E = [ dx(phi), dy(phi), dx(phi) ];             // E field, z=unused
+  func E = [ dx(phi), dy(phi), 0 ];                   // E field, z=unused
   Vh[int] D(3);                                       // Anisotropic field
   mulMv(D, EPS, E);                                   // D(i) = eps(i, :) * E(:)
 
@@ -182,7 +182,7 @@ for(real t=0; t < tend; t+=dt) {
 
 //~   plot2d(Allh, "mesh");
 //~   Ph eps00 = EPS[0][0]; plot3d(eps00, "eps00");
-  plot2d(phi, "phi");
+//~   plot2d(phi, "phi");
 //~   plot2d([D[0], D[1]], "D field");
 //~   plot2d(T[0], "T11");
 //~   plot2d(T[1], "T12");
@@ -214,7 +214,7 @@ for(real t=0; t < tend; t+=dt) {
 //~   plotenv(edxT12, dx(T[1]), "dx(T12)");
 //~   plotenv(edyT12, dy(T[1]), "dy(T12)");
 
-//~   plotenv2(efx, efy, fx, fy, "force field, int(x): " + int2d(Ballh)(fx) + ", int(y): " + int2d(Ballh)(fy));
+  plotenv2(efx, efy, fx, fy, "force field, int(x): " + int2d(Ballh)(fx) + ", int(y): " + int2d(Ballh)(fy));
 ////////////////////////////////////////////////////////////////////////////////
 
 }
