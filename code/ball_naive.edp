@@ -1,0 +1,218 @@
+/*******************************************************************************
+ * 
+ * Move a ball according to the stress tensor
+ * 
+ * Regions: ball, vacuum, frame
+ * Solve for E (phi) on union -> get stress
+ * Solve for movement on ball
+ * move ball
+ * Repeat
+ * 
+ ******************************************************************************/
+
+
+include "borders.idp"
+
+macro plot3d(obj, label) plot(obj, fill=true, value=true, ShowAxes=true, dim=3, wait=true, cmm = label); // EOM
+macro plot2d(obj, label) plot(obj, fill=true, value=true, ShowAxes=true, dim=2, wait=true, cmm = label); // EOM
+
+
+// Material parameters
+
+real e0 = 8.854187 *1;
+real[int] epsilon1(9);
+real[int] epsilon2(9);
+
+epsilon1 = [ 2.2*e0,      0,      0,
+                  0, 2.2*e0,      0,
+                  0,      0, 2.2*e0 ];
+
+epsilon2 = [ 1.*e0, 0,     0,
+             0,     1.*e0, 0,
+             0,     0,     1.*e0 ];
+
+
+// Geometry parameters
+
+real[int] ballpos(2);
+ballpos = [1., 2.];
+real ballr = 0.5;
+//~ int ballh = 60;
+//~ int frameh = 90;
+int ballh = 20;
+int frameh = 40;
+
+real[int] ballposold = ballpos;
+
+
+// Simulation parameters
+
+real dt = 0.2;
+real tend = dt*12;
+real switchtime = tend/2;
+real phiCup = -2;   // constrain phi on upper border
+real phiCdown = 2;  // constrain phi on lower border
+real[int] ballv(2);
+ballv = [0, 0];
+
+
+// Border construction
+
+int Lball = 101, Lboxo = 102, Lboxi = 103,
+    Lboxdown = 104, Lboxright = 105, Lboxup = 106, Lboxleft = 107;
+
+borderLineCycle4(S1, [-1,0], Lboxdown,
+                 S2, [ 5,0], Lboxright,
+                 S3, [ 5,5], Lboxup,
+                 S4, [-1,5], Lboxleft)
+
+borderLineCycle6(S5,  [-0.9, 0.1], Lboxi,
+                 S6a, [ 4.9, 0.1], Lboxi,
+                 S6b, [ 4.9, 3.1], Lboxi,
+                 S7a, [ 2  , 3.1], Lboxi,
+                 S7b, [ 2  , 4.9], Lboxi,
+                 S8,  [-0.9, 4.9], Lboxi)
+
+macro bordersNonball(n) S1(n) + S2(n) + S3(n) + S4(n)
+  + S5(n) + S6a(n) + S6b(n/2) + S7a(n/3) + S7b(n) + S8(n) // EOM
+
+border B(t=0,2*pi) {
+  x = ballpos[0]+ballr*cos(t);
+  y = ballpos[1]+ballr*sin(t);
+  label = Lball;
+}
+
+
+// Some linear algebra helper macros
+
+macro mulMv(res, M, v)
+  res[0] = M[0][0]*v[0] + M[0][1]*v[1] + M[0][2]*v[2];
+  res[1] = M[1][0]*v[0] + M[1][1]*v[1] + M[1][2]*v[2];
+  res[2] = M[2][0]*v[0] + M[2][1]*v[1] + M[2][2]*v[2];
+// EOM
+
+macro dyad(res, a, b)
+  res[0] = a[0]*b[0]; res[1] = a[0]*b[1]; res[2] = a[0]*b[2];
+  res[3] = a[1]*b[0]; res[4] = a[1]*b[1]; res[5] = a[1]*b[2];
+  res[6] = a[2]*b[0]; res[7] = a[2]*b[1]; res[8] = a[2]*b[2];
+// EOM
+
+macro dotp(a, b)
+  ( a[0]*b[0] + a[1]*b[1] + a[2]*b[2] )
+// EOM
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+for(real t=0; t < tend; t+=dt) {
+
+  // Build meshes
+
+  mesh Ballh = buildmesh( B(ballh) );
+  mesh Allh = buildmesh( B(ballh) + bordersNonball(frameh));
+
+
+  // Define regions and set material parameters accordingly
+
+  fespace Ph(Allh,P0);
+  Ph reg = region;
+  int rE  = reg(4,4);                        // frame
+  int rI  = reg(0,4);                        // vacuum
+  int rB  = reg(ballpos[0],ballpos[1]);  // ball region
+
+  macro rEps(num) (reg==rE||reg==rB)*epsilon1[num] + (reg==rI)*epsilon2[num]  // EOM
+  func EPS = [ [ rEps(0), rEps(1), rEps(2) ],
+               [ rEps(3), rEps(4), rEps(5) ],
+               [ rEps(6), rEps(7), rEps(8) ] ];
+
+
+  // Setup
+
+  fespace Vh(Allh,P2);
+  Vh phi, w;
+
+  if(abs(t-switchtime)<dt/2) {
+    real tmp = phiCup; phiCup = phiCdown; phiCdown = tmp;
+  }
+
+
+  // Solve the problem
+
+  problem LaplaceVarf(phi,w,solver=CG) = int2d(Allh,qft=qf5pT)(
+      EPS[0][0] * dx(phi)*dx(w)
+    + EPS[0][1] * dx(phi)*dy(w)
+    + EPS[1][0] * dy(phi)*dx(w)
+    + EPS[1][1] * dy(phi)*dy(w))
+    + on(Lboxup,phi = phiCup)
+    + on(Lboxdown,phi = phiCdown)
+    ;
+  LaplaceVarf;
+
+
+  // Calculate the stress tensor
+
+  func E = [ dx(phi), dy(phi), dx(phi) ];             // E field, z=unused
+  Vh[int] D(3);                                       // Anisotropic field
+  mulMv(D, EPS, E);                                   // D(i) = eps(i, :) * E(:)
+
+  Vh[int] T(9);                                       // stress tensor
+  dyad(T, -E, D);
+  T[0] = T[0] + 0.5*dotp(E, D);                       // add to the diag
+  T[4] = T[4] + 0.5*dotp(E, D);
+  T[8] = T[8] + 0.5*dotp(E, D);
+
+
+  // Calculate the forces and apply collapsed Velocity Verlet on ball position
+
+  Vh fx = dx(T[0])+dy(T[3]);                          // should be ~0
+  Vh fy = dx(T[1])+dy(T[4]);
+
+  ballv[0] += int1d(Ballh, Lball) (fx) * dt / 1.;             // ball mass := 1
+  ballpos[0] = 2*ballpos[0] - ballposold[0] + dt*ballv[0];
+  ballv[1] += int1d(Ballh, Lball) (fy) * dt / 1.;             // ball mass := 1
+  ballpos[1] = 2*ballpos[1] - ballposold[1] + dt*ballv[1];
+
+  ballposold = ballpos;
+
+
+  // Plotting
+
+//~   plot2d(Allh, "mesh");
+//~   Ph eps00 = EPS[0][0]; plot3d(eps00, "eps00");
+  plot2d(phi, "phi");
+//~   plot2d([D[0], D[1]], "D field");
+//~   plot2d(T[0], "T11");
+//~   plot2d(T[1], "T12");
+//~   plot2d(T[3], "T21");
+//~   plot2d(T[4], "T22");
+//~   plot2d([fx, fy], "force field, int(x): " + int2d(Ballh)(fx) + ", int(y): " + int2d(Ballh)(fy));
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Plotting environment
+  macro plotenv(tmp, v, lab) Venvh tmp = v; plot2d(tmp, lab); // EOM
+  macro plotenv2(t1, t2, v1, v2, lab) Venvh t1=v1; Venvh t2=v2; plot2d([t1,t2], lab); // EOM
+
+  border Benv(t=0,2*pi) { x = ballpos[0]+2*ballr*cos(t); y = ballpos[1]+2*ballr*sin(t); label = Lball; }
+  mesh Envh = buildmesh(Benv(3*ballh));
+  fespace Venvh(Envh, P2);
+//~   plot2d(Envh, "env mesh");
+
+//~   plotenv(ephi, phi, "phi");
+//~   plotenv2(eEx, eEy, E[0], E[1], "E field");
+//~   plotenv2(eDx, eDy, D[0], D[1], "D field");
+
+//~   plotenv(eT11, T[0], "T11");
+//~   plotenv(edT11, dx(T[0]), "dx(T11)");
+//~   plotenv(eT22, T[4], "T22");
+//~   plotenv(edT22, dy(T[4]), "dy(T22)");
+
+//~   plotenv(eT12, T[1], "T12 == T21");
+//~   Vh dT12 = dx(T[1]);
+//~   plotenv(edxT12, dT12, "dx(T12)");
+//~   plotenv(edyT12, dy(T[1]), "dy(T12)");
+
+//~   plotenv2(efx, efy, fx, fy, "force field, int(x): " + int2d(Ballh)(fx) + ", int(y): " + int2d(Ballh)(fy));
+////////////////////////////////////////////////////////////////////////////////
+
+}

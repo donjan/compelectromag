@@ -200,7 +200,7 @@ for(real t=0; t < tend; t+=dt) {
 //~   Vh dxT12 = dx(T12); plotenv(dxT12, "dx(T12)");
 //~   Vh dyT12 = dy(T12); plotenv(dyT12, "dy(T12)");
 //~ 
-//~   plotenv2(f1,f2, "force field, int(x): " + int2d(Ballh)(f1) + ", int(y): " + int2d(Ballh)(f2));
+  plotenv2(f1,f2, "force field, int(x): " + int2d(Ballh)(f1) + ", int(y): " + int2d(Ballh)(f2));
 ////////////////////////////////////////////////////////////////////////////////
 }
 

@@ -1,0 +1,98 @@
+/*******************************************************************************
+ * 
+ * Linear border helper macros
+ * 
+ ******************************************************************************/
+
+macro borderLine(a, b, lab) (t=0,1) { x = a[0]+t*(b[0]-a[0]); y = a[1]+t*(b[1]-a[1]); label = lab; } // EOM
+
+macro borderChain3(b1, p1, l1,
+                   b2, p2, l2,
+                   b3, p3, l3,
+                   p4)
+  border b1 borderLine(p1, p2, l1)
+  border b2 borderLine(p2, p3, l2)
+  border b3 borderLine(p3, p4, l3)
+// EOM
+
+
+macro borderLineCycle3(b1, p1, l1,
+                       b2, p2, l2,
+                       b3, p3, l3)
+  border b1 borderLine(p1, p2, l1)
+  border b2 borderLine(p2, p3, l2)
+  border b3 borderLine(p3, p1, l3)
+// EOM
+
+macro borderLineCycle4(b1, p1, l1,
+                       b2, p2, l2,
+                       b3, p3, l3,
+                       b4, p4, l4)
+  borderChain3(b1, p1, l1, b2, p2, l2, b3, p3, l3, p4)
+  border b4 borderLine(p4, p1, l4)
+// EOM
+
+
+macro borderLineCycle5(b1, p1, l1,
+                       b2, p2, l2,
+                       b3, p3, l3,
+                       b4, p4, l4,
+                       b5, p5, l5)
+  borderChain3(b1, p1, l1, b2, p2, l2, b3, p3, l3, p4)
+  border b4 borderLine(p4, p5, l4)
+  border b5 borderLine(p5, p1, l5)
+// EOM
+
+macro borderLineCycle6(b1, p1, l1,
+                       b2, p2, l2,
+                       b3, p3, l3,
+                       b4, p4, l4,
+                       b5, p5, l5,
+                       b6, p6, l6)
+  borderChain3(b1, p1, l1, b2, p2, l2, b3, p3, l3, p4)
+  border b4 borderLine(p4, p5, l4)
+  border b5 borderLine(p5, p6, l5)
+  border b6 borderLine(p6, p1, l6)
+// EOM
+
+macro borderLineCycle7(b1, p1, l1,
+                       b2, p2, l2,
+                       b3, p3, l3,
+                       b4, p4, l4,
+                       b5, p5, l5,
+                       b6, p6, l6,
+                       b7, p7, l7)
+  borderChain3(b1, p1, l1, b2, p2, l2, b3, p3, l3, p4)
+  borderChain3(b4, p4, l4, b5, p5, l5, b6, p6, l6, p7)
+  border b7 borderLine(p7, p1, l7)
+// EOM
+
+macro borderLineCycle8(b1, p1, l1,
+                       b2, p2, l2,
+                       b3, p3, l3,
+                       b4, p4, l4,
+                       b5, p5, l5,
+                       b6, p6, l6,
+                       b7, p7, l7,
+                       b8, p8, l8)
+  borderChain3(b1, p1, l1, b2, p2, l2, b3, p3, l3, p4)
+  borderChain3(b4, p4, l4, b5, p5, l5, b6, p6, l6, p7)
+  border b7 borderLine(p7, p8, l7)
+  border b8 borderLine(p8, p1, l8)
+// EOM
+
+macro borderLineCycle9(b1, p1, l1,
+                       b2, p2, l2,
+                       b3, p3, l3,
+                       b4, p4, l4,
+                       b5, p5, l5,
+                       b6, p6, l6,
+                       b7, p7, l7,
+                       b8, p8, l8,
+                       b9, p9, l9)
+  borderChain3(b1, p1, l1, b2, p2, l2, b3, p3, l3, p4)
+  borderChain3(b4, p4, l4, b5, p5, l5, b6, p6, l6, p7)
+  border b7 borderLine(p7, p8, l7)
+  border b8 borderLine(p8, p9, l8)
+  border b9 borderLine(p9, p1, l9)
+// EOM
