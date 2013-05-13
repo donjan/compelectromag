@@ -1,0 +1,293 @@
+/*******************************************************************************
+ * 
+ * Move a ball according to the stress tensor
+ * 
+ * Regions: ball, vacuum, frame
+ * Solve for E (phi) on union -> get stress
+ * Solve for movement on ball
+ * move ball
+ * Repeat (update union, keep track of regions)
+ * 
+ * TODO: define regions as a function of constants, then use adaptmesh
+ * 
+ ******************************************************************************/
+
+
+
+macro plot3d(obj, label) plot(obj, fill=true, value=true, ShowAxes=true, dim=3, wait=true, cmm = label); // EOM
+macro plot2d(obj, label) plot(obj, fill=true, value=true, ShowAxes=true, dim=2, wait=true, cmm = label); // EOM
+
+macro borderline(a, b, lab) (t=0,1) { x = a[0]+t*(b[0]-a[0]); y = a[1]+t*(b[1]-a[1]); label = lab; } // EOM
+
+
+
+
+// border codes
+int Lball = 101, Lboxo = 102, Lboxi = 103,
+    Lboxdown = 104, Lboxright = 105, Lboxup = 106, Lboxleft = 107;
+
+real[int] ballstart(2);
+ballstart = [0., 1.];
+
+real e0 = 8.854187 *1;
+real[int] epsilon1(9);
+real[int] epsilon2(9);
+
+epsilon1 = [ 1.2*e0,      0,      0,
+                  0, 1.2*e0,      0,
+                  0,      0, 1.2*e0 ];
+
+epsilon2 = [ 1.*e0, 0, 0,
+             0, 1.*e0, 0,
+             0, 0, 1.*e0 ];
+
+
+
+
+border S1 borderline([-1,0], [5,0],  Lboxdown)
+border S2 borderline([5,0],  [5,5],  Lboxright)
+border S3 borderline([5,5],  [-1,5], Lboxup)
+border S4 borderline([-1,5], [-1,0], Lboxleft)
+
+//~ borderchain(S1, [-1,0], Lboxdown,
+//~             S2, [ 5,0], Lboxright,
+//~             S3, [ 5,5], Lboxup,
+//~             S4, [-1,5], Lboxleft)
+
+//~ border S5 borderline([-0.9,0.1], [4.9,0.1],  Lboxi)
+//~ border S6a borderline([4.9,0.1], [4.9,2],    Lboxi)
+//~ border S6b borderline([4.9,2],   [2,2],      Lboxi)
+//~ border S7a borderline([2,2],     [2,4.9],    Lboxi)
+//~ border S7b borderline([2,4.9],   [-0.9,4.9], Lboxi)
+//~ border S8 borderline([-0.9,4.9], [-0.9,0.1], Lboxi)
+border S5 borderline([-0.9,0.1], [4.9,0.1],  Lboxi)
+border S6a borderline([4.9,0.1], [4.9,3.8],    Lboxi)
+border S6b borderline([4.9,3.8],   [2,3.8],      Lboxi)
+border S7a borderline([2,3.8],     [2,4.9],    Lboxi)
+border S7b borderline([2,4.9],   [-0.9,4.9], Lboxi)
+border S8 borderline([-0.9,4.9], [-0.9,0.1], Lboxi)
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+real dt = 15, tend = dt*30;
+real t;
+for (int m=0;m<=tend/dt;m++) {
+
+
+  border B(t=0,2*pi) { x = ballstart[0]+0.2*cos(t); y = ballstart[1]+0.2*sin(t); label = Lball; }
+
+  macro bordersBall(n) B(n) // EOM
+  macro bordersNonball(n) S1(20) + S2(20) + S3(20) + S4(20)
+                     + S5(20) + S6a(20) + S6b(20) + S7a(20) + S7b(20) + S8(20) // EOM
+
+	int ballref = 25;
+
+	  mesh Ballh = buildmesh( B(ballref) );
+	  mesh Frameh = buildmesh( S1(20) + S2(20) + S3(20) + S4(20)
+						 + S5(-20) + S6a(-20) + S6b(-20) + S7a(-20) + S7b(-20) + S8(-20) );
+	  mesh Vach = buildmesh( S5(20) + S6a(20) + S6b(20) + S7a(20) + S7b(20) + S8(20) );
+
+	  mesh Sh = buildmesh( S1(20) + S2(20) + S3(20) + S4(20)
+						 + S5(20) + S6a(20) + S6b(20) + S7a(20) + S7b(20) + S8(20) );
+
+	  mesh Allh0 = buildmesh(bordersBall(ballref) + bordersNonball(50));
+	  mesh Allh1 = buildmesh(bordersBall(ballref+1) + bordersNonball(50));
+	  mesh Allh2 = buildmesh(bordersBall(ballref+2) + bordersNonball(50));
+	  
+
+
+	  
+	  fespace Vh0(Allh0,P2);
+	  fespace Bh(Ballh,P2);
+
+	  fespace Vh1(Allh1,P2);
+
+	  fespace Vh2(Allh2,P2);
+
+	  
+	  fespace Ph0(Allh0,P0);
+	  
+      Vh0 phi0, w0;
+      Vh1 phi1, w1;
+      Vh2 phi2, w2;
+	  phi1=phi2;
+	  Ph0 reg = region;
+	  
+	  int rE  = reg(4,4);  // frame
+	  int rI  = reg(0,4);  // vacuum
+	  int rB  = reg(ballstart[0],ballstart[1]);  // ball region
+
+	  macro setEps(num) (reg==rE||reg==rB)*epsilon1[num] + (reg==rI)*epsilon2[num]  // EOM
+	  Vh0 e11 = setEps(0);
+	  Vh0 e12 = setEps(1);
+	  Vh0 e13 = setEps(2);
+	  Vh0 e21 = setEps(3);
+	  Vh0 e22 = setEps(4);
+	  Vh0 e23 = setEps(5);
+	  Vh0 e31 = setEps(6);
+	  Vh0 e32 = setEps(7);
+	  Vh0 e33 = setEps(8);
+
+	  Vh2 e11mesh2 = e11;
+
+	  real phiCup = 2;
+	  real phiCdown = -2;
+	  real phiCleft = 0;
+	  real phiCright = 0;
+	  macro setPhiBound(label, value) on(label, phi=value)  // EOM
+
+	  problem LaplaceVarf0(phi0,w0,solver=sparsesolver) = int2d(Allh0)(
+				  e11 * dx(phi0)*dx(w0)
+				+ e12 * dx(phi0)*dy(w0)
+				+ e21 * dy(phi0)*dx(w0)
+				+ e22 * dy(phi0)*dy(w0))
+				+ on(Lboxup,phi0 = phiCup)
+				+ on(Lboxdown,phi0 = phiCdown)
+				;
+	  LaplaceVarf0;
+
+
+	  Vh0 Ex = dx(phi0);
+	  Vh0 Ey = dy(phi0);
+	  Vh0 Ez = dx(phi0)*0;
+
+	  // TODO: tensor this
+	  Vh0 D1 = Ex * e11 + Ey * e12 + Ez * e13;
+		Vh0 D2 = Ex * e21 + Ey * e22 + Ez * e23;
+		Vh0 D3 = Ex * e31 + Ey * e32 + Ez * e33;
+		Vh0 T11 = - Ex * D1  + 0.5 * (Ex*D1 + Ey*D2 + Ez*D3);
+		Vh0 T22 = - Ey * D2  + 0.5 * (Ex*D1 + Ey*D2 + Ez*D3);
+		Vh0 T33 = - Ez * D3  + 0.5 * (Ex*D1 + Ey*D2 + Ez*D3);
+		Vh0 T12 = - Ex * D2;
+		Vh0 T21 = - Ey * D1;
+		Vh0 T13 = - Ex * D3;
+		Vh0 T23 = - Ex * D3;
+		Vh0 f1fesp0 =  dx(T11)+dy(T21);
+		Vh0 f2fesp0 =  dx(T21)+dy(T22);
+		//plot(f1fesp0,cmm="f1",wait=true);
+		//plot(f2fesp0,cmm="f2",wait=true);
+
+
+	  problem LaplaceVarf1(phi1,w1,solver=sparsesolver) = int2d(Allh1)(
+				  e11 * dx(phi1)*dx(w1)
+				+ e12 * dx(phi1)*dy(w1)
+				+ e21 * dy(phi1)*dx(w1)
+				+ e22 * dy(phi1)*dy(w1))
+				+ on(Lboxup,phi1 = phiCup)
+				+ on(Lboxdown,phi1 = phiCdown)
+				;
+	  LaplaceVarf1;
+	  
+	  Ex = dx(phi1);
+	  Ey = dy(phi1);
+	  Ez = dx(phi1)*0;
+
+	  // TODO: tensor this
+	  D1 = Ex * e11 + Ey * e12 + Ez * e13;
+		D2 = Ex * e21 + Ey * e22 + Ez * e23;
+		D3 = Ex * e31 + Ey * e32 + Ez * e33;
+		T11 = - Ex * D1  + 0.5 * (Ex*D1 + Ey*D2 + Ez*D3);
+		T22 = - Ey * D2  + 0.5 * (Ex*D1 + Ey*D2 + Ez*D3);
+		T33 = - Ez * D3  + 0.5 * (Ex*D1 + Ey*D2 + Ez*D3);
+		T12 = - Ex * D2;
+		T21 = - Ey * D1;
+		T13 = - Ex * D3;
+		T23 = - Ex * D3;
+		Vh1 f1fesp1 =  dx(T11)+dy(T21);
+		Vh1 f2fesp1 =  dx(T21)+dy(T22);
+		
+	  problem LaplaceVarf2(phi2,w2,solver=sparsesolver) = int2d(Allh2)(
+				  e11 * dx(phi2)*dx(w2)
+				+ e12 * dx(phi2)*dy(w2)
+				+ e21 * dy(phi2)*dx(w2)
+				+ e22 * dy(phi2)*dy(w2))
+				+ on(Lboxup,phi2 = phiCup)
+				+ on(Lboxdown,phi2 = phiCdown);
+	  LaplaceVarf2;
+	  Ex = dx(phi2);
+	  Ey = dy(phi2);
+	  Ez = dx(phi2)*0;
+
+	  // TODO: tensor this
+	  D1 = Ex * e11 + Ey * e12 + Ez * e13;
+		D2 = Ex * e21 + Ey * e22 + Ez * e23;
+		D3 = Ex * e31 + Ey * e32 + Ez * e33;
+		T11 = - Ex * D1  + 0.5 * (Ex*D1 + Ey*D2 + Ez*D3);
+		T22 = - Ey * D2  + 0.5 * (Ex*D1 + Ey*D2 + Ez*D3);
+		T33 = - Ez * D3  + 0.5 * (Ex*D1 + Ey*D2 + Ez*D3);
+		T12 = - Ex * D2;
+		T21 = - Ey * D1;
+		T13 = - Ex * D3;
+		T23 = - Ex * D3;
+		Vh2 f1fesp2 =  dx(T11)+dy(T21);
+		Vh2 f2fesp2 =  dx(T21)+dy(T22);
+		
+		f1fesp1 = f1fesp1+f1fesp2;
+		f1fesp0=f1fesp0+f1fesp1;
+		f1fesp0=f1fesp0*0.33333;
+
+		f2fesp1 = f2fesp1+f2fesp2;
+		f2fesp0 = f2fesp0+f2fesp1;
+		f2fesp0 = f2fesp0*0.33333;
+		plot(f2,wait=true,cmm="the F1 force",value=true,fill=true);
+}
+//f1=f1/avgMeshNum;
+//f2=f2/avgMeshNum;
+
+//plot2d(f1,"asdf");
+//plot2d(f2,"asdfdd");
+
+//~ D1 = Ex*e11; D2 = Ey * e22; D3 = Ez * e33;
+//T11 = Ex*D1 - 0.5 * (Ex*D1  );  T12 = Ex*D2;
+//T22 = Ey*D2 - 0.5 * (Ey*D2  );  T21 = Ey*D1;
+//f1 = T11;
+//f2 = T22;
+//~ f1 = dx(T11)+dy(T12);
+//~ f2 = dx(T22)+dy(T21);
+
+//~ f1 = Ex;
+//~ f2 = Ey;
+//~ T11 = 
+
+/*
+
+  Bh f2b = f2;
+  Bh phib = phi;
+//~   plot2d(f2b, "f2b");
+
+  border Benv(t=0,2*pi) { x = ballstart[0]+0.4*cos(t); y = ballstart[1]+0.4*sin(t); label = Lball; }
+  mesh Eh = buildmesh(Benv(2*ballref));
+//~ plot2d(Eh, "env mesh");
+  fespace Veh(Eh, P2);
+  Veh Exenv = Ex;
+  Veh Eyenv = Ey;
+
+//~   plot2d([Exenv, Eyenv], "Ex" );
+  Veh f1env = f1;
+  Veh f2env = f2;
+  //plot2d([f1env, f2env], int2d(Ballh)(f2) );
+Veh phienv = phi;
+//~   plot2d(phienv, "phi" );
+
+
+  t += dt;
+
+//~   cout << f1 << endl;
+  // TODO: acceleration, inertia
+  ballstart[0] += int2d(Ballh) (f1) *dt;
+  ballstart[1] += int2d(Ballh) (f2) *dt;
+//~   cout << f1 << endl;
+
+//~   Allh = buildmesh(bordersBall(10) + bordersNonball(20));
+//~   plot3d(f2, "f2");
+  plot2d(phi, "phi");
+//~   plot2d(Allh, "mesh");
+//~   plot2d(f1, "forces");
+
+*/
+
+
