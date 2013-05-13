@@ -210,9 +210,9 @@ for(real t=0; t < tend; t+=dt) {
 
 //~   plotenv(eT12, T[1], "T12 == T21");
 //~   plotenv(edxT12, dx(T[1]), "dx(T12)");
-//~   plotenv(edyT12, dy(T[1]), "dy(T12)");
+//~   plotenv(edyT12, dy(T[3]), "dy(T12)");
 
-  plotenv2(efx, efy, fx, fy, "force field, int(x): " + int2d(Ballh)(fx) + ", int(y): " + int2d(Ballh)(fy));
+//~   plotenv2(efx, efy, fx,  fy, "force field, int(x): " + int2d(Ballh)(fx) + ", int(y): " + int2d(Ballh)(fy));
 ////////////////////////////////////////////////////////////////////////////////
 
 }

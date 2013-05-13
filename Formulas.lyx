@@ -164,7 +164,7 @@ As given by Joseph Bar-Cohen
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula $\sigma_{ij}=-(\varepsilon_{i1}\phi_{i}\phi_{1}+\varepsilon_{i2}\phi_{i}\phi_{2}+\varepsilon_{i2}\phi_{i}\phi_{3})+$
+\begin_inset Formula $\sigma_{ij}=-(\varepsilon_{i1}\phi_{i}\phi_{1}+\varepsilon_{i2}\phi_{i}\phi_{2}+\varepsilon_{i3}\phi_{i}\phi_{3})+$
 \end_inset
 
 
@@ -188,7 +188,7 @@ As given by Joseph Bar-Cohen
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula $\sigma_{ij}=-(\varepsilon_{i1}\phi_{i}\phi_{1}+\varepsilon_{i2}\phi_{i}\phi_{2}+\varepsilon_{i2}\phi_{i}\phi_{3})+$
+\begin_inset Formula $\sigma_{ij}=-(\varepsilon_{i1}\phi_{i}\phi_{1}+\varepsilon_{i2}\phi_{i}\phi_{2}+\varepsilon_{i3}\phi_{i}\phi_{3})+$
 \end_inset
 
 
@@ -205,28 +205,7 @@ As given by Joseph Bar-Cohen
 \end_inset
 
 
-\begin_inset Formula $\frac{1}{2}\delta_{ij}(\varepsilon_{11}\phi_{1}\phi_{1}+\varepsilon_{12}\phi_{2}\phi_{1}+\varepsilon_{13}\phi_{3}\phi_{1}+(\varepsilon_{21}\phi_{1}\phi_{2}+\varepsilon_{22}\phi_{2}\phi_{2}+\varepsilon_{23}\phi_{3}\phi_{2}+\varepsilon_{31}\phi_{1}\phi_{3}+\varepsilon_{32}\phi_{2}\phi_{3}+\varepsilon_{33}\phi_{3}\phi_{3})$
-\end_inset
-
-
-\begin_inset Formula $\sigma_{ij}=-(\varepsilon_{i1}(\phi_{i}\phi+\phi\phi_{1}???????????)+\varepsilon_{i2}\phi_{i}\phi_{2}+\varepsilon_{i2}\phi_{i}\phi_{3})+$
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\SpecialChar \-
-
-\begin_inset space \qquad{}
-\end_inset
-
-
-\begin_inset space \qquad{}
-\end_inset
-
-
-\begin_inset Formula $\frac{1}{2}\delta_{ij}(\varepsilon_{11}\phi_{1}\phi_{1}+\varepsilon_{12}\phi_{2}\phi_{1}+\varepsilon_{13}\phi_{3}\phi_{1}+(\varepsilon_{21}\phi_{1}\phi_{2}+\varepsilon_{22}\phi_{2}\phi_{2}+\varepsilon_{23}\phi_{3}\phi_{2}+\varepsilon_{31}\phi_{1}\phi_{3}+\varepsilon_{32}\phi_{2}\phi_{3}+\varepsilon_{33}\phi_{3}\phi_{3})$
+\begin_inset Formula $\frac{1}{2}\delta_{ij}(\varepsilon_{11}\phi_{1}\phi_{1}+\varepsilon_{12}\phi_{2}\phi_{1}+\varepsilon_{13}\phi_{3}\phi_{1}+\varepsilon_{21}\phi_{1}\phi_{2}+\varepsilon_{22}\phi_{2}\phi_{2}+\varepsilon_{23}\phi_{3}\phi_{2}+\varepsilon_{31}\phi_{1}\phi_{3}+\varepsilon_{32}\phi_{2}\phi_{3}+\varepsilon_{33}\phi_{3}\phi_{3})$
 \end_inset
 
 
@@ -234,7 +213,7 @@ As given by Joseph Bar-Cohen
 
 \begin_layout Standard
 \begin_inset Formula $\sigma_{ij}=\left(\begin{array}{ccc}
-...\\
+... & ... & ...\\
 \\
 \\
 \end{array}\right)$
@@ -261,9 +240,23 @@ Finite volume force
 \begin_layout Standard
 Force 2-dim 
 \begin_inset Formula $f=\left(\begin{array}{c}
-\partial_{x}\sigma_{11}+\partial_{y}\sigma_{12}\\
-\partial_{x}\sigma_{21}+\partial_{y}\sigma_{22}
+\partial_{x}\sigma_{11}+\partial_{y}\sigma_{21}\\
+\partial_{x}\sigma_{12}+\partial_{y}\sigma_{22}
 \end{array}\right)$
+\end_inset
+
+ VERIFY
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $\partial_{x}\sigma_{11}=$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $\partial_{y}\sigma_{21}=-\partial_{2}(\varepsilon_{21}\phi_{2}\phi_{1}+\varepsilon_{22}\phi_{2}\phi_{2}+\varepsilon_{22}\phi_{2}\phi_{3})=-\varepsilon_{21}(\phi_{22}\phi_{1}+\phi_{2}\phi_{21})-\varepsilon_{22}(\phi_{22}\phi_{2}\cdot2)-\varepsilon_{21}(\phi_{22}\phi_{3}+\phi_{2}\phi_{23})$
 \end_inset
 
 
