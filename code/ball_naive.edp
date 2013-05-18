@@ -165,12 +165,16 @@ for(real t=0; t < tend; t+=dt) {
 
   // Calculate the forces and apply collapsed Velocity Verlet on ball position
 
-  Vh fx = dx(T[0])+dy(T[3]);                          // should be ~0
-  Vh fy = dx(T[1])+dy(T[4]);
-
-  ballv[0] += int2d(Ballh) (fx) * dt / 1.;             // ball mass := 1
+  Vh fx=0; 
+  fx = dx(T[0])+dy(T[3]);                          // should be ~0
+  Vh fy=0; 
+  fy = dx(T[1])+dy(T[4]);
+  real FxNet =int2d(Ballh) (fx);
+  real FyNet =int2d(Ballh) (fy);
+  
+  ballv[0] += FxNet * dt / 1.;             // ball mass := 1
   ballpos[0] = 2*ballpos[0] - ballposold[0] + dt*ballv[0];
-  ballv[1] += int2d(Ballh) (fy) * dt / 1.;             // ball mass := 1
+  ballv[1] += FyNet * dt / 1.;             // ball mass := 1
   ballpos[1] = 2*ballpos[1] - ballposold[1] + dt*ballv[1];
 
   ballposold = ballpos;
@@ -180,19 +184,20 @@ for(real t=0; t < tend; t+=dt) {
 
 //~   plot2d(Allh, "mesh");
 //~   Ph eps00 = EPS[0][0]; plot3d(eps00, "eps00");
-  plot2d(phi, "phi");
+  //~ plot2d(phi, "phi");
+  
 //~   plot2d([D[0], D[1]], "D field");
 //~   plot2d(T[0], "T11");
 //~   plot2d(T[1], "T12");
 //~   plot2d(T[3], "T21");
 //~   plot2d(T[4], "T22");
-//~   plot2d([fx, fy], "force field, int(x): " + int2d(Ballh)(fx) + ", int(y): " + int2d(Ballh)(fy));
+  //~ plot2d([fx, fy], "force field, int(x): " + int2d(Ballh)(fx) + ", int(y): " + int2d(Ballh)(fy));
 
 
 ////////////////////////////////////////////////////////////////////////////////
 // Plotting environment
   macro plotenv(tmp, v, lab) Venvh tmp = v; plot2d(tmp, lab); // EOM
-  macro plotenv2(t1, t2, v1, v2, lab) Venvh t1=v1; Venvh t2=v2; plot2d([t1,t2], lab); // EOM
+  macro plotenv2(t1, t2, v1, v2, lab) Venvh t1 = v1; Venvh t2=v2; plot2d([t1,t2], lab); // EOM
 
   border Benv(t=0,2*pi) { x = ballpos[0]+2*ballr*cos(t); y = ballpos[1]+2*ballr*sin(t); label = Lball; }
   mesh Envh = buildmesh(Benv(3*ballh));
@@ -212,7 +217,9 @@ for(real t=0; t < tend; t+=dt) {
 //~   plotenv(edxT12, dx(T[1]), "dx(T12)");
 //~   plotenv(edyT12, dy(T[1]), "dy(T12)");
 
-//~   plotenv2(efx, efy, fx, fy, "force field, int(x): " + int2d(Ballh)(fx) + ", int(y): " + int2d(Ballh)(fy));
+  //plotenv2(efx, efy, fx, fy, "force field, int(x): " + int2d(Ballh)(fx) + ", int(y): " + int2d(Ballh)(fy));
+
+cout<< t<<"    "<<FxNet <<", int(y): " << FyNet <<endl;
 ////////////////////////////////////////////////////////////////////////////////
 
 }
