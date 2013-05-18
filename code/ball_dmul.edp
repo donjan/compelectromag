@@ -11,7 +11,7 @@
  * 
  ******************************************************************************/
 
-load "Element_P3"
+
 include "borders.idp"
 
 macro plot3d(obj, label) plot(obj, fill=true, value=true, ShowAxes=true, dim=3, wait=true, cmm = label); // EOM
@@ -24,9 +24,9 @@ real e0 = 8.854187 *1;
 real[int] epsilon1(9);
 real[int] epsilon2(9);
 
-epsilon1 = [ 220*e0,      0,      0,
-                  0, 220*e0,      0,
-                  0,      0, 220*e0 ];
+epsilon1 = [ 2.2*e0,      0,      0,
+                  0, 2.2*e0,      0,
+                  0,      0, 2.2*e0 ];
 
 epsilon2 = [ 1.*e0, 0,     0,
              0,     1.*e0, 0,
@@ -48,11 +48,11 @@ real[int] ballposold = ballpos;
 
 // Simulation parameters
 
-real dt = 0.01;
+real dt = 0.2;
 real tend = dt*12;
 real switchtime = tend/2;
-real phiCup = 2;   // constrain phi on upper border
-real phiCdown = -2;  // constrain phi on lower border
+real phiCup = -2;   // constrain phi on upper border
+real phiCdown = 2;  // constrain phi on lower border
 real[int] ballv(2);
 ballv = [0, 0];
 
@@ -60,7 +60,8 @@ ballv = [0, 0];
 // Border construction
 
 int Lball = 101, Lboxo = 102, Lboxi = 103,
-    Lboxdown = 104, Lboxright = 105, Lboxup = 106, Lboxleft = 107;
+    Lboxdown = 104, Lboxright = 105, Lboxup = 106, Lboxleft = 107,
+    Lballenv = 108;
 
 borderLineCycle4([-1,0], Bod, Lboxdown,
                  [ 5,0], Bor, Lboxright,
@@ -79,7 +80,7 @@ macro bordersNonball(n) Bod(n) + Bor(n) + Bou(n) + Bol(n)
   + Bid(n) + Bir(n) + Bii1(n/3) + Bii2(n/3) + Bii3(n/3) + Biu(n) + Bil(n) // EOM
 
 border B(t=0,2*pi) {
-  x = ballpos[0]+ballr*cos(t);
+  x = ballpos[0]+0.5*ballr*cos(t);
   y = ballpos[1]+ballr*sin(t);
   label = Lball;
 }
@@ -105,9 +106,8 @@ macro dotp(a, b)
 
 
 ////////////////////////////////////////////////////////////////////////////////
-
-  ofstream ofile("forces");
-for(real t=0; t < tend; t+=dt) {
+ofstream of("forces"); 
+for(real tau=0; tau < tend; tau+=dt) {
 
   // Build meshes
 
@@ -134,39 +134,27 @@ for(real t=0; t < tend; t+=dt) {
   fespace Vh(Allh,P2);
   Vh phi, w;
 
-  if(abs(t-switchtime)<dt/2) {
+  if(abs(tau-switchtime)<dt/2) {
     real tmp = phiCup; phiCup = phiCdown; phiCdown = tmp;
   }
 
-  //real tmp = phiCup; phiCup = (tend-t)*(phiCup);
 
   // Solve the problem
 
- solve LaplaceVarf(phi,w,solver=GMRES) = int2d(Allh/*,qft=qf5pT*/)(
+  problem LaplaceVarf(phi,w,solver=CG) = int2d(Allh,qft=qf5pT)(
       EPS[0][0] * dx(phi)*dx(w)
     + EPS[0][1] * dx(phi)*dy(w)
     + EPS[1][0] * dy(phi)*dx(w)
     + EPS[1][1] * dy(phi)*dy(w))
-    + on(Lboxup,phi = phiCup*(2*t-tend)/tend)
-    + on(Lboxdown,phi = phiCdown*((2*t-tend)/tend));
-  /*
-  varf LaplaceBCVarf(phi,w,solver=GMRES) = 
-    on(Lboxup,phi = phiCup*(2*t-tend)/tend)
-    + on(Lboxdown,phi = phiCdown*(2*t-tend)/tend);
-  
-  phi=0;
-  
-  matrix A = LaplaceVarf(Vh,Vh);
-  Vh cc;
-  cc[] = LaplaceBCVarf(0,Vh);
-  phi[] = A^-1*cc[];
-*/
-//  LaplaceVarf;
+    + on(Lboxup,phi = phiCup)
+    + on(Lboxdown,phi = phiCdown)
+    ;
+  LaplaceVarf;
 
 
   // Calculate the stress tensor
 
-  func E = [ dx(phi), dy(phi), 0 ];                   // E field, z=unused
+  func E = [ -dx(phi), -dy(phi), 0 ];                 // E field, z=unused
   Vh[int] D(3);                                       // Anisotropic field
   mulMv(D, EPS, E);                                   // D(i) = eps(i, :) * E(:)
 
@@ -179,65 +167,70 @@ for(real t=0; t < tend; t+=dt) {
 
   // Calculate the forces and apply collapsed Velocity Verlet on ball position
   // TODO: derivation in formulas.lyx
-//~ 
-  //~ Vh fx = dx(T[0]) - EPS[0][0]*(dyy(phi)*E[0]+E[1]*dyx(phi)) - EPS[0][1]*(2*dyy(phi)*E[1]);
-  //~ Vh fy = - EPS[0][0]*(2*dxx(phi)*E[0]) - EPS[0][1]*(dxx(phi)*E[1]+E[0]*dxy(phi)) + dy(T[4]);
-  Vh dxxp = dxx(phi);
-  Vh dxyp = dxy(phi);
-  Vh dxp = dx(phi);
-  Vh dyp = dy(phi);
-  Vh dxxpxp = dxx(phi)*dx(phi);
-  Vh dxxpyp = dxx(phi)*dy(phi);
-  Vh dxypyp = dxy(phi)*dy(phi);
-  Vh dxypxp = dxy(phi)*dx(phi);
-  Vh dyypxp = dyy(phi)*dx(phi);
-  Vh dyypyp = dxy(phi)*dy(phi);
-  
-  /*
-  Vh fx = EPS[0][0]*(-dxxpxp + dxypyp - dxypyp - dyypxp);
-  Vh fy = EPS[0][0]*(-dyypyp + dxypxp - dxxpyp- dxypyp);
-  */
-  //From ball naive:
-  Vh fx = dx(T[0])+dy(T[3]);
-  Vh fy = dx(T[1])+dy(T[4]);
-  
-  plot(dxxp,cmm="dxxphi",wait=true);
-/*
-  //Only isotropic material parameters:
-  Vh fx = -EPS[0][0] * (2*dxx(phi)*dx(phi)) +EPS[0][0]*(dxx(phi)*dx(phi) + dyy(phi)*dy(phi))
-		  EPS[0][0] * (dxy(phi)*dy(phi)+dxx(phi)*dx(phi));
-		  
-  Vh fy = EPS[0][0] * (2*dyy(phi)*dy(phi)) +EPS[0][0]*(dxx(phi)*dx(phi) + dyy(phi)*dy(phi))
-		  EPS[0][0] * (dxy(phi)*dy(phi)+dyy(phi)*dy(phi));
-		  
-*/
 
-  ballv[0] += int2d(Ballh) (fx) * dt / 1.;             // ball mass := 1
+//~ Vh a1 = dx(phi);
+//~ Vh a2 = dy(a1);
+//~ plot3d(a2, "single diffs");
+//~ Vh a3 = dyx(phi);
+//~ plot3d(a2, "multi diffs");
+//~ 
+//~ exit(0);
+
+
+
+
+//~ Vh XX1 = dy(T[3]);                          // should be ~0
+//~ plot2d(XX1 ,"naive");
+//~ Vh T3a = -E[1]*D[0];
+//~ Vh XX3 = dy(T3a);
+//~ plot3d(XX3 ,"dyad");
+//~ Vh T3b = - EPS[0][0]*E[1]*E[0] - EPS[0][1]*E[1]*E[1] - EPS[0][2]*E[1]*E[2];
+//~ Vh XX4 = dy(T3b);
+//~ plot3d(XX4 ,"full E");
+//~ Vh T3c = - EPS[0][0]*(-dy(phi))*(-dx(phi)) - EPS[0][1]*(-dy(phi))*(-dy(phi)) - 0;
+//~ Vh XX5 = dy(T3c);
+//~ plot3d(XX5 ,"full E with phi");
+Vh XX6a = - EPS[0][0]*(    dy(phi)*dx(phi)    );
+Vh XX6b = - EPS[0][1]*(    dy(phi)*dy(phi)    );
+Vh XX6c = XX6a /*+XX6b*/;
+Vh XX6 = dy(XX6c);
+plot2d(XX6 ,"full E with phi, split");
+Vh XX7a = - EPS[0][0]*(    dyy(phi)*dx(phi) + dy(phi)*dyx(phi)   );
+Vh XX7b = - EPS[0][1]*(    dyy(phi)*dy(phi) * 2   );
+Vh XX7 = XX7a /*+XX7b*/;
+plot2d(XX7 ,"full E with phi dmul");
+//~ Vh XX2 = - EPS[1][0]*(dyy(phi)*E[0]+E[1]*dyx(phi)) - EPS[1][1]*(2*dyy(phi)*E[1]);                          // should be ~0
+//~ plot3d(XX2 ,"dmul");
+exit(0);
+//~ Vh Xa = dy( - EPS[0][0]*(     dy(phi)*dx(phi)                 )  - EPS[0][1]*(     dy(phi)*dy(phi)    ) );
+//~ Vh Xb =     - EPS[0][1]*( dyy(phi)*dx(phi) + dy(phi)*dyx(phi) )  - EPS[0][1]*(    dyy(phi)*dy(phi) * 2   );
+
+  Vh fx = dx(T[0]) - EPS[1][0]*(dyy(phi)*E[0]+E[1]*dyx(phi)) - EPS[1][1]*(2*dyy(phi)*E[1]);
+  Vh fy = - EPS[0][0]*(2*dxx(phi)*E[0]) - EPS[0][1]*(dxx(phi)*E[1]+E[0]*dxy(phi)) + dy(T[4]);
+
+
+  real Fx = int1d(Ballh, Lball) (fx*N.x);
+  real Fy = int1d(Ballh, Lball) (fy*N.y);
+//~   real Fx = int2d(Ballh) (fx);  // same as above
+//~   real Fy = int2d(Ballh) (fy);
+
+  ballv[0] += Fx * dt / 1.;                           // ball mass := 1
   ballpos[0] = 2*ballpos[0] - ballposold[0] + dt*ballv[0];
-  ballv[1] += int2d(Ballh) (fy) * dt / 1.;             // ball mass := 1
+  ballv[1] += Fy * dt / 1.;                           // ball mass := 1
   ballpos[1] = 2*ballpos[1] - ballposold[1] + dt*ballv[1];
 
-{
-  real Fx = int1d(Ballh,Lball)(fx*N.x);
-  real Fy = int1d(Ballh,Lball)(fy*N.y);
-  ofstream afile("forceData.dat");
-  afile<<Fx<<","<<Fy<<endl;
-  ballpos[0] +=Fx * dt;
-  ballpos[1] +=Fy * dt;
-  ofile<<Fx<<","<<Fy<<endl;
 
-}
   // Plotting
 
 //~   plot2d(Allh, "mesh");
 //~   Ph eps00 = EPS[0][0]; plot3d(eps00, "eps00");
-  //plot2d(phi, "phi");
+//~   plot2d(phi, "phi");
 //~   plot2d([D[0], D[1]], "D field");
 //~   plot2d(T[0], "T11");
 //~   plot2d(T[1], "T12");
 //~   plot2d(T[3], "T21");
 //~   plot2d(T[4], "T22");
-//~   plot2d([fx, fy], "force field, int(x): " + int2d(Ballh)(fx) + ", int(y): " + int2d(Ballh)(fy));
+//~   plot2d([fx, fy], "force field, Fx: " + Fx + ", Fy: " + Fy);
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -245,7 +238,7 @@ for(real t=0; t < tend; t+=dt) {
   macro plotenv(tmp, v, lab) Venvh tmp = v; plot2d(tmp, lab); // EOM
   macro plotenv2(t1, t2, v1, v2, lab) Venvh t1=v1; Venvh t2=v2; plot2d([t1,t2], lab); // EOM
 
-  border Benv(t=0,2*pi) { x = ballpos[0]+2*ballr*cos(t); y = ballpos[1]+2*ballr*sin(t); label = Lball; }
+  border Benv(t=0,2*pi) { x = ballposold[0]+2*ballr*cos(t); y = ballposold[1]+2*ballr*sin(t); label = Lballenv; }
   mesh Envh = buildmesh(Benv(3*ballh));
   fespace Venvh(Envh, P2);
 //~   plot2d(Envh, "env mesh");
@@ -263,7 +256,10 @@ for(real t=0; t < tend; t+=dt) {
 //~   plotenv(edxT12, dx(T[1]), "dx(T12)");
 //~   plotenv(edyT12, dy(T[1]), "dy(T12)");
 
-//~   plotenv2(efx, efy, fx, fy, "force field, int(x): " + int2d(Ballh)(fx) + ", int(y): " + int2d(Ballh)(fy));
+//~   plotenv2(efx, efy, fx, fy, "t=" + tau + ", force field, Fx: " + Fx + ", Fy: " + Fy);
+//~   of << tau << "  " << Fx << "  " << Fy << endl;
 ////////////////////////////////////////////////////////////////////////////////
+
+  ballposold = ballpos;
 
 }

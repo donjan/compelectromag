@@ -1,0 +1,44 @@
+
+
+load "Element_P3"
+include "borders.idp"
+macro plot3d(obj, label) plot(obj, fill=true, value=true, ShowAxes=true, dim=3, wait=true, cmm = label); // EOM
+macro plot2d(obj, label) plot(obj, fill=true, value=true, ShowAxes=true, dim=2, wait=true, cmm = label); // EOM
+
+int unused = 100, Lboxdown = 101, Lboxright = 102, Lboxup = 103, Lboxleft = 104;
+
+
+borderLineCycle4([0,0], Bod, unused,
+                 [3,0], Bor, unused,
+                 [3,3], Bou, unused,
+                 [0,3], Bol, unused)
+borderLineCycle4([1,1], Bid, Lboxdown,
+                 [2,1], Bir, Lboxright,
+                 [2,2], Biu, Lboxup,
+                 [1,2], Bil, Lboxleft)
+
+int hout = 50, hin = 25;
+mesh Boxh = buildmesh( Bod(hout)+Bor(hout)+Bou(hout)+Bol(hout)
+                      +Bid(hin)+Bir(hin)+Biu(hin)+Bil(hin) );
+//~ plot2d(Boxh, "Box mesh");
+
+fespace Vh(Boxh,P2);
+Vh phi, w;
+
+
+problem LaplaceVarf(phi,w,solver=CG) =
+  int2d(Boxh)(  dx(phi)*dx(w) + dy(phi)*dy(w)  )
+  + on(Lboxup, phi = 2)
+  + on(Lboxdown, phi = -2)
+  ;
+LaplaceVarf;
+plot3d(phi, "phi");
+
+
+// dy(dx(phi)*dy(phi)) = dyx(phi)*dy(phi) + dx(phi)*dyy(phi)
+
+Vh mm = dx(phi)*dy(phi);
+Vh mmy = dy(mm);
+plot2d(mmy, "derivative of multiplication");
+Vh mmy2 = dyx(phi)*dy(phi) + dx(phi)*dyy(phi);
+plot2d(mmy2, "product rule");
