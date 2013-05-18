@@ -80,7 +80,7 @@ macro bordersNonball(n) Bod(n) + Bor(n) + Bou(n) + Bol(n)
   + Bid(n) + Bir(n) + Bii1(n/3) + Bii2(n/3) + Bii3(n/3) + Biu(n) + Bil(n) // EOM
 
 border B(t=0,2*pi) {
-  x = ballpos[0]+ballr*cos(t);
+  x = ballpos[0]+0.5*ballr*cos(t);
   y = ballpos[1]+ballr*sin(t);
   label = Lball;
 }
@@ -154,7 +154,7 @@ for(real tau=0; tau < tend; tau+=dt) {
 
   // Calculate the stress tensor
 
-  func E = [ dx(phi), dy(phi), 0 ];                   // E field, z=unused
+  func E = [ -dx(phi), -dy(phi), 0 ];                 // E field, z=unused
   Vh[int] D(3);                                       // Anisotropic field
   mulMv(D, EPS, E);                                   // D(i) = eps(i, :) * E(:)
 
@@ -168,11 +168,51 @@ for(real tau=0; tau < tend; tau+=dt) {
   // Calculate the forces and apply collapsed Velocity Verlet on ball position
   // TODO: derivation in formulas.lyx
 
+//~ Vh a1 = dx(phi);
+//~ Vh a2 = dy(a1);
+//~ plot3d(a2, "single diffs");
+//~ Vh a3 = dyx(phi);
+//~ plot3d(a2, "multi diffs");
+//~ 
+//~ exit(0);
+
+
+
+
+//~ Vh XX1 = dy(T[3]);                          // should be ~0
+//~ plot2d(XX1 ,"naive");
+//~ Vh T3a = -E[1]*D[0];
+//~ Vh XX3 = dy(T3a);
+//~ plot3d(XX3 ,"dyad");
+//~ Vh T3b = - EPS[0][0]*E[1]*E[0] - EPS[0][1]*E[1]*E[1] - EPS[0][2]*E[1]*E[2];
+//~ Vh XX4 = dy(T3b);
+//~ plot3d(XX4 ,"full E");
+//~ Vh T3c = - EPS[0][0]*(-dy(phi))*(-dx(phi)) - EPS[0][1]*(-dy(phi))*(-dy(phi)) - 0;
+//~ Vh XX5 = dy(T3c);
+//~ plot3d(XX5 ,"full E with phi");
+Vh XX6a = - EPS[0][0]*(    dy(phi)*dx(phi)    );
+Vh XX6b = - EPS[0][1]*(    dy(phi)*dy(phi)    );
+Vh XX6c = XX6a /*+XX6b*/;
+Vh XX6 = dy(XX6c);
+plot2d(XX6 ,"full E with phi, split");
+Vh XX7a = - EPS[0][0]*(    dyy(phi)*dx(phi) + dy(phi)*dyx(phi)   );
+Vh XX7b = - EPS[0][1]*(    dyy(phi)*dy(phi) * 2   );
+Vh XX7 = XX7a /*+XX7b*/;
+plot2d(XX7 ,"full E with phi dmul");
+//~ Vh XX2 = - EPS[1][0]*(dyy(phi)*E[0]+E[1]*dyx(phi)) - EPS[1][1]*(2*dyy(phi)*E[1]);                          // should be ~0
+//~ plot3d(XX2 ,"dmul");
+exit(0);
+//~ Vh Xa = dy( - EPS[0][0]*(     dy(phi)*dx(phi)                 )  - EPS[0][1]*(     dy(phi)*dy(phi)    ) );
+//~ Vh Xb =     - EPS[0][1]*( dyy(phi)*dx(phi) + dy(phi)*dyx(phi) )  - EPS[0][1]*(    dyy(phi)*dy(phi) * 2   );
+
   Vh fx = dx(T[0]) - EPS[1][0]*(dyy(phi)*E[0]+E[1]*dyx(phi)) - EPS[1][1]*(2*dyy(phi)*E[1]);
   Vh fy = - EPS[0][0]*(2*dxx(phi)*E[0]) - EPS[0][1]*(dxx(phi)*E[1]+E[0]*dxy(phi)) + dy(T[4]);
 
-  real Fx = int1d(Ballh, Lball) (-fx*N.x);
-  real Fy = int1d(Ballh, Lball) (-fy*N.y);
+
+  real Fx = int1d(Ballh, Lball) (fx*N.x);
+  real Fy = int1d(Ballh, Lball) (fy*N.y);
+//~   real Fx = int2d(Ballh) (fx);  // same as above
+//~   real Fy = int2d(Ballh) (fy);
 
   ballv[0] += Fx * dt / 1.;                           // ball mass := 1
   ballpos[0] = 2*ballpos[0] - ballposold[0] + dt*ballv[0];
@@ -184,7 +224,7 @@ for(real tau=0; tau < tend; tau+=dt) {
 
 //~   plot2d(Allh, "mesh");
 //~   Ph eps00 = EPS[0][0]; plot3d(eps00, "eps00");
-  plot2d(phi, "phi");
+//~   plot2d(phi, "phi");
 //~   plot2d([D[0], D[1]], "D field");
 //~   plot2d(T[0], "T11");
 //~   plot2d(T[1], "T12");
