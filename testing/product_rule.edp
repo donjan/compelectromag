@@ -1,5 +1,5 @@
 
-
+load "Element_P3"
 include "borders.idp"
 macro plot3d(obj, label) plot(obj, fill=true, value=true, ShowAxes=true, dim=3, wait=true, cmm = label); // EOM
 macro plot2d(obj, label) plot(obj, fill=true, value=true, ShowAxes=true, dim=2, wait=true, cmm = label); // EOM
@@ -16,12 +16,13 @@ borderLineCycle4([1,1], Bid, Lboxdown,
                  [2,2], Biu, Lboxup,
                  [1,2], Bil, Lboxleft)
 
-int hout = 10, hin = 5;
+//~ int hout = 10, hin = 5;
+int hout = 30, hin = 15;
 mesh Boxh = buildmesh( Bod(hout)+Bor(hout)+Bou(hout)+Bol(hout)
                       +Bid(hin)+Bir(hin)+Biu(hin)+Bil(hin) );
 //~ plot2d(Boxh, "Box mesh");
 
-fespace Vh(Boxh,P2);
+fespace Vh(Boxh,P3);
 Vh phi, w;
 
 

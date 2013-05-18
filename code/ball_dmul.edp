@@ -12,6 +12,7 @@
  ******************************************************************************/
 
 
+load "Element_P3"
 include "borders.idp"
 
 macro plot3d(obj, label) plot(obj, fill=true, value=true, ShowAxes=true, dim=3, wait=true, cmm = label); // EOM
@@ -23,6 +24,7 @@ macro plot2d(obj, label) plot(obj, fill=true, value=true, ShowAxes=true, dim=2, 
 real e0 = 8.854187 *1;
 real[int] epsilon1(9);
 real[int] epsilon2(9);
+real[int] epsilon3(9);
 
 epsilon1 = [ 2.2*e0,      0,      0,
                   0, 2.2*e0,      0,
@@ -32,23 +34,42 @@ epsilon2 = [ 1.*e0, 0,     0,
              0,     1.*e0, 0,
              0,     0,     1.*e0 ];
 
+//~ epsilon3 = [ 2.2*e0, 0,      0,           // ball = dielectric
+//~              0,      2.2*e0, 0,
+//~              0,      0,      2.2*e0 ];
+//~ 
+//~ epsilon3 = [ 1e6*e0, 0,      0,           // ball = conductor
+//~              0,      1e6*e0, 0,
+//~              0,      0,      1e6*e0 ];
+
+epsilon3 = [ 1.*e0, 0,     0,           // ball = isolator
+             0,     1.*e0, 0,
+             0,     0,     1.*e0 ];
+
+
+//~ real chargedens = 0;
+real chargedens = -30;
+
 
 // Geometry parameters
 
 real[int] ballpos(2);
-ballpos = [1., 2.];
+ballpos = [1., 4.];
 real ballr = 0.5;
 //~ int ballh = 60;
 //~ int frameh = 90;
-int ballh = 20;
-int frameh = 40;
+//~ int ballh = 20;
+//~ int frameh = 40;
+int ballh = 10;
+int frameh = 20;
 
 real[int] ballposold = ballpos;
 
 
 // Simulation parameters
 
-real dt = 0.2;
+real dt = 0.1;
+//~ real dt = 10.;  // for conductor
 real tend = dt*12;
 real switchtime = tend/2;
 real phiCup = -2;   // constrain phi on upper border
@@ -123,15 +144,19 @@ for(real tau=0; tau < tend; tau+=dt) {
   int rI  = reg(0,4);                        // vacuum
   int rB  = reg(ballpos[0],ballpos[1]);  // ball region
 
-  macro rEps(num) (reg==rE||reg==rB)*epsilon1[num] + (reg==rI)*epsilon2[num]  // EOM
+  macro rEps(num) (reg==rE)*epsilon1[num]
+                + (reg==rI)*epsilon2[num]
+                + (reg==rB)*epsilon3[num]  // EOM
   func EPS = [ [ rEps(0), rEps(1), rEps(2) ],
                [ rEps(3), rEps(4), rEps(5) ],
                [ rEps(6), rEps(7), rEps(8) ] ];
 
+  func source = (reg==rE)*0 + (reg==rI)*0 + (reg==rB)*chargedens;
+
 
   // Setup
 
-  fespace Vh(Allh,P2);
+  fespace Vh(Allh,P3);
   Vh phi, w;
 
   if(abs(tau-switchtime)<dt/2) {
@@ -141,15 +166,16 @@ for(real tau=0; tau < tend; tau+=dt) {
 
   // Solve the problem
 
-  problem LaplaceVarf(phi,w,solver=CG) = int2d(Allh,qft=qf5pT)(
+  problem PoissonVarf(phi,w,solver=CG) = int2d(Allh)(
       EPS[0][0] * dx(phi)*dx(w)
     + EPS[0][1] * dx(phi)*dy(w)
     + EPS[1][0] * dy(phi)*dx(w)
-    + EPS[1][1] * dy(phi)*dy(w))
+    + EPS[1][1] * dy(phi)*dy(w) )
+    - int2d(Allh)( source*w )
     + on(Lboxup,phi = phiCup)
     + on(Lboxdown,phi = phiCdown)
     ;
-  LaplaceVarf;
+  PoissonVarf;
 
 
   // Calculate the stress tensor
@@ -168,46 +194,30 @@ for(real tau=0; tau < tend; tau+=dt) {
   // Calculate the forces and apply collapsed Velocity Verlet on ball position
   // TODO: derivation in formulas.lyx
 
-//~ Vh a1 = dx(phi);
-//~ Vh a2 = dy(a1);
-//~ plot3d(a2, "single diffs");
-//~ Vh a3 = dyx(phi);
-//~ plot3d(a2, "multi diffs");
-//~ 
-//~ exit(0);
-
-
-
-
 //~ Vh XX1 = dy(T[3]);                          // should be ~0
-//~ plot2d(XX1 ,"naive");
+//~ plot3d(XX1 ,"naive");
 //~ Vh T3a = -E[1]*D[0];
 //~ Vh XX3 = dy(T3a);
 //~ plot3d(XX3 ,"dyad");
-//~ Vh T3b = - EPS[0][0]*E[1]*E[0] - EPS[0][1]*E[1]*E[1] - EPS[0][2]*E[1]*E[2];
+//~ Vh T3b = - E[1]*EPS[0][0]*E[0] - E[1]*EPS[0][1]*E[1] - E[1]*EPS[0][2]*E[2];
 //~ Vh XX4 = dy(T3b);
 //~ plot3d(XX4 ,"full E");
 //~ Vh T3c = - EPS[0][0]*(-dy(phi))*(-dx(phi)) - EPS[0][1]*(-dy(phi))*(-dy(phi)) - 0;
 //~ Vh XX5 = dy(T3c);
 //~ plot3d(XX5 ,"full E with phi");
-Vh XX6a = - EPS[0][0]*(    dy(phi)*dx(phi)    );
-Vh XX6b = - EPS[0][1]*(    dy(phi)*dy(phi)    );
-Vh XX6c = XX6a /*+XX6b*/;
-Vh XX6 = dy(XX6c);
-plot2d(XX6 ,"full E with phi, split");
-Vh XX7a = - EPS[0][0]*(    dyy(phi)*dx(phi) + dy(phi)*dyx(phi)   );
-Vh XX7b = - EPS[0][1]*(    dyy(phi)*dy(phi) * 2   );
-Vh XX7 = XX7a /*+XX7b*/;
-plot2d(XX7 ,"full E with phi dmul");
-//~ Vh XX2 = - EPS[1][0]*(dyy(phi)*E[0]+E[1]*dyx(phi)) - EPS[1][1]*(2*dyy(phi)*E[1]);                          // should be ~0
-//~ plot3d(XX2 ,"dmul");
-exit(0);
-//~ Vh Xa = dy( - EPS[0][0]*(     dy(phi)*dx(phi)                 )  - EPS[0][1]*(     dy(phi)*dy(phi)    ) );
-//~ Vh Xb =     - EPS[0][1]*( dyy(phi)*dx(phi) + dy(phi)*dyx(phi) )  - EPS[0][1]*(    dyy(phi)*dy(phi) * 2   );
+//~ Vh XX6a = - EPS[0][0]*(    dy(phi)*dx(phi)    );
+//~ Vh XX6b = - EPS[0][1]*(    dy(phi)*dy(phi)    );
+//~ Vh XX6c = XX6a /*+XX6b*/;
+//~ Vh XX6 = dy(XX6c);
+//~ plot3d(XX6 ,"full E with phi, split");
+//~ Vh XX7a = - EPS[0][0]*(    dyy(phi)*dx(phi) + dy(phi)*dyx(phi)   );
+//~ Vh XX7b = - EPS[0][1]*(    dyy(phi)*dy(phi) * 2   );
+//~ Vh XX7 = XX7a /*+XX7b*/;
+//~ plot3d(XX7 ,"full E with phi dmul");
+//~ exit(0);
 
-  Vh fx = dx(T[0]) - EPS[1][0]*(dyy(phi)*E[0]+E[1]*dyx(phi)) - EPS[1][1]*(2*dyy(phi)*E[1]);
-  Vh fy = - EPS[0][0]*(2*dxx(phi)*E[0]) - EPS[0][1]*(dxx(phi)*E[1]+E[0]*dxy(phi)) + dy(T[4]);
-
+  Vh fx = dx(T[0]) - EPS[0][0]*(dyy(phi)*dx(phi)+dy(phi)*dyx(phi)) - EPS[0][1]*(2*dyy(phi)*dy(phi));
+  Vh fy = - EPS[1][0]*(dxx(phi)*dx(phi)*2) - EPS[1][1]*(dxx(phi)*dy(phi)+dx(phi)*dxy(phi)) + dy(T[4]);
 
   real Fx = int1d(Ballh, Lball) (fx*N.x);
   real Fy = int1d(Ballh, Lball) (fy*N.y);
@@ -224,7 +234,7 @@ exit(0);
 
 //~   plot2d(Allh, "mesh");
 //~   Ph eps00 = EPS[0][0]; plot3d(eps00, "eps00");
-//~   plot2d(phi, "phi");
+  plot2d(phi, "phi");
 //~   plot2d([D[0], D[1]], "D field");
 //~   plot2d(T[0], "T11");
 //~   plot2d(T[1], "T12");
@@ -239,8 +249,8 @@ exit(0);
   macro plotenv2(t1, t2, v1, v2, lab) Venvh t1=v1; Venvh t2=v2; plot2d([t1,t2], lab); // EOM
 
   border Benv(t=0,2*pi) { x = ballposold[0]+2*ballr*cos(t); y = ballposold[1]+2*ballr*sin(t); label = Lballenv; }
-  mesh Envh = buildmesh(Benv(3*ballh));
-  fespace Venvh(Envh, P2);
+  mesh Envh = buildmesh(Benv(2*ballh));
+  fespace Venvh(Envh, P3);
 //~   plot2d(Envh, "env mesh");
 
 //~   plotenv(ephi, phi, "phi");
