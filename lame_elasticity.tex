@@ -1,0 +1,13 @@
+\begin{lstlisting}[frame=single]
+macro div(u,v) ( dx(u)+dy(v) ) // EOM
+macro epsilon(u1,u2)  [dx(u1),dy(u2),(dy(u1)+dx(u2))/sqrt2] // EOM
+...
+Vh f1 = dx(T11)+dy(T21);
+Vh f2 = dx(T21)+dy(T22);
+...
+varf lame([u,v],[uu,vv])= int2d(Th)(
+    (reg==regInternal?lambda1:lambda2)*div(u,v)*div(uu,vv)
+    +2.*(reg==regInternal?mu1:mu2)* epsilon_t(u,v) * epsilon(uu,vv)) 
+    + on(3,v=0,u=0);		
+\end{lstlisting}
+
