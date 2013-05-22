@@ -111,14 +111,14 @@ As given by Joseph Bar-Cohen
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula $\sigma_{ij}=-\varepsilon_{im}E_{i}E_{m}+\frac{1}{2}\delta_{ij}\varepsilon_{mk}E_{m}E_{k}$
+\begin_inset Formula $\sigma_{ij}=-\varepsilon_{jm}E_{i}E_{m}+\frac{1}{2}\delta_{ij}\varepsilon_{mk}E_{m}E_{k}$
 \end_inset
 
 
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula $\sigma_{ij}=-(\varepsilon_{i1}E_{i}E_{1}+\varepsilon_{i2}E_{i}E_{2}+\varepsilon_{i3}E_{i}E_{3})+$
+\begin_inset Formula $\sigma_{ij}=-(\varepsilon_{j1}E_{i}E_{1}+\varepsilon_{j2}E_{i}E_{2}+\varepsilon_{j3}E_{i}E_{3})+$
 \end_inset
 
 
@@ -157,14 +157,14 @@ As given by Joseph Bar-Cohen
 \end_inset
 
  , 
-\begin_inset Formula $\cdot_{x}=\partial_{x}$
+\begin_inset Formula $\cdot_{x}=\partial_{x}\cdot$
 \end_inset
 
 
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula $\sigma_{ij}=-(\varepsilon_{i1}\phi_{i}\phi_{1}+\varepsilon_{i2}\phi_{i}\phi_{2}+\varepsilon_{i3}\phi_{i}\phi_{3})+$
+\begin_inset Formula $\sigma_{ij}=-(\varepsilon_{j1}\phi_{i}\phi_{1}+\varepsilon_{j2}\phi_{i}\phi_{2}+\varepsilon_{j3}\phi_{i}\phi_{3})+$
 \end_inset
 
 
@@ -188,7 +188,7 @@ As given by Joseph Bar-Cohen
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula $\sigma_{ij}=-(\varepsilon_{i1}\phi_{i}\phi_{1}+\varepsilon_{i2}\phi_{i}\phi_{2}+\varepsilon_{i3}\phi_{i}\phi_{3})+$
+\begin_inset Formula $\sigma_{ij}=-(\varepsilon_{j1}\phi_{i}\phi_{1}+\varepsilon_{j2}\phi_{i}\phi_{2}+\varepsilon_{j3}\phi_{i}\phi_{3})+$
 \end_inset
 
 
@@ -256,14 +256,21 @@ Force 2-dim
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula $\partial_{y}\sigma_{21}=-\partial_{2}(\varepsilon_{21}\phi_{2}\phi_{1}+\varepsilon_{22}\phi_{2}\phi_{2}+\varepsilon_{22}\phi_{2}\phi_{3})=-\varepsilon_{21}(\phi_{22}\phi_{1}+\phi_{2}\phi_{21})-\varepsilon_{22}(\phi_{22}\phi_{2}\cdot2)-\varepsilon_{23}(\phi_{22}\phi_{3}+\phi_{2}\phi_{23})$
+\begin_inset Formula $d_{y}\sigma_{21}=d_{y}(-E_{y}\cdot D_{x})=d_{y}(-E_{y}\cdot(\varepsilon_{11}E_{x}+\varepsilon_{12}E_{y}+\varepsilon_{13}E_{z}))$
 \end_inset
 
 
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula $\partial_{y}\sigma_{12}=-\partial_{2}(\varepsilon_{21}\phi_{2}\phi_{1}+\varepsilon_{22}\phi_{2}\phi_{2}+\varepsilon_{22}\phi_{2}\phi_{3})=-\varepsilon_{21}(\phi_{22}\phi_{1}+\phi_{2}\phi_{21})-\varepsilon_{22}(\phi_{22}\phi_{2}\cdot2)-\varepsilon_{23}(\phi_{22}\phi_{3}+\phi_{2}\phi_{23})$
+\begin_inset Formula $\partial_{y}\sigma_{21}=-\partial_{2}(\varepsilon_{11}\phi_{2}\phi_{1}+\varepsilon_{12}\phi_{2}\phi_{2}+\varepsilon_{13}\phi_{2}\phi_{3})=-\varepsilon_{11}(\phi_{22}\phi_{1}+\phi_{2}\phi_{21})-\varepsilon_{12}(\phi_{22}\phi_{2}\cdot2)-\varepsilon_{13}(\phi_{22}\phi_{3}+\phi_{2}\phi_{23})$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $\partial_{x}\sigma_{12}=-\partial_{1}(\varepsilon_{21}\phi_{1}\phi_{1}+\varepsilon_{22}\phi_{1}\phi_{2}+\varepsilon_{23}\phi_{1}\phi_{3})=-\varepsilon_{21}(\phi_{11}\phi_{1}\cdot2)-\varepsilon_{22}(\phi_{11}\phi_{2}+\phi_{1}\phi_{12})-\varepsilon_{23}(\phi_{11}\phi_{3}+\phi_{1}\phi_{13})$
 \end_inset
 
 
