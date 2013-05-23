@@ -41,9 +41,6 @@
 
 % seems to fix typewriter font in outline header:
 \usepackage{ae,aecompl}
-
-% for colored table backgrounds
-\usepackage{colortbl} 
 \end_preamble
 \use_default_options true
 \maintain_unincluded_children false
@@ -93,6 +90,7 @@
 \papercolumns 1
 \papersides 1
 \paperpagestyle default
+\listings_params "backgroundcolor={\color{yellow!20}},basicstyle={\tiny\ttfamily},language={C++},numbers={left},numbersep=5pt,numberstyle={\tiny},stepnumber={1}"
 \tracking_changes false
 \output_changes false
 \html_math_output 0
@@ -132,21 +130,21 @@ pgfuseimage{institution-logo}}
 \end_layout
 
 \begin_layout Institute
-Institute
+Swiss Federal Institute of Technology (ETH Zurich)
 \end_layout
 
 \begin_layout Title
-Title
+Calculation of Maxwell's Stress Tensor with FreeFem++
 \end_layout
 
 \begin_layout Subtitle
 
 \size normal
-Subtitle
+Computational Electromagnetism Project
 \size default
  
 \begin_inset Argument
-status open
+status collapsed
 
 \begin_layout Plain Layout
 short subtitle
@@ -170,15 +168,7 @@ optional, use only with long paper titles
 \begin_layout Author
 
 \size footnotesize
-Author
-\begin_inset Newline newline
-\end_inset
-
-More
-\begin_inset Newline newline
-\end_inset
-
-
+Donjan Rodic & Charilaos Mylonas
 \end_layout
 
 \begin_layout Date
@@ -313,7 +303,7 @@ status open
 
 \end_inset
 
-First bullet point
+Electrostrictive materials - Electroactive polymers (Artificial Muscles)
 \begin_inset VSpace medskip
 \end_inset
 
@@ -331,25 +321,11 @@ status open
 
 \end_inset
 
-Second bullet point
+Oil and fuel puriffication 
 \begin_inset VSpace medskip
 \end_inset
 
 
-\end_layout
-
-\begin_layout Itemize
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-<3->
-\end_layout
-
-\end_inset
-
-Third bullet point
 \end_layout
 
 \begin_layout EndFrame
@@ -357,7 +333,7 @@ Third bullet point
 \end_layout
 
 \begin_layout BeginFrame
-Frame title 2
+Goals
 \end_layout
 
 \begin_layout Itemize
@@ -371,7 +347,7 @@ status open
 
 \end_inset
 
-First bullet point
+Anisotropic Electrostatics
 \begin_inset VSpace medskip
 \end_inset
 
@@ -389,7 +365,36 @@ status open
 
 \end_inset
 
-Second bullet point
+Electrostatic (Maxwell) stress coupled with elasticity
+\end_layout
+
+\begin_layout Itemize
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<3->
+\end_layout
+
+\end_inset
+
+Electrostatic forces moving a ball
+\end_layout
+
+\begin_layout Itemize
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<4->
+\end_layout
+
+\end_inset
+
+Gaining experience using open source Finite Element software for electromagnetic
+s
 \end_layout
 
 \begin_layout EndFrame
@@ -397,53 +402,76 @@ Second bullet point
 \end_layout
 
 \begin_layout BeginFrame
-OpenMPI ULFM
+The Maxwell Stress Tensor
 \end_layout
 
 \begin_layout Standard
-\begin_inset Box Frameless
-position "c"
-hor_pos "c"
-has_inner_box 1
-inner_pos "c"
-use_parbox 0
-use_makebox 0
-width "35col%"
-special "none"
-height "1in"
-height_special "totalheight"
+The Lorentz Force Law in the presence of an electrostatic field reads:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
 status open
 
 \begin_layout Plain Layout
-image
+
+
+\backslash
+begin{equation}
+\end_layout
+
+\begin_layout Plain Layout
+
+f = 
+\backslash
+rho 
+\backslash
+vec E
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{equation}
 \end_layout
 
 \end_inset
 
 
-\begin_inset Box Frameless
-position "c"
-hor_pos "c"
-has_inner_box 1
-inner_pos "c"
-use_parbox 0
-use_makebox 0
-width "55col%"
-special "none"
-height "1in"
-height_special "totalheight"
+\end_layout
+
+\begin_layout Standard
+and taking into account
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
 status open
 
-\begin_layout Itemize
-foo
+\begin_layout Plain Layout
+
+
+\backslash
+begin{equation}
 \end_layout
 
-\begin_layout Itemize
-bar
+\begin_layout Plain Layout
+
+
+\backslash
+nabla 
+\backslash
+vec D = 
+\backslash
+rho
 \end_layout
 
-\begin_layout Itemize
-foobar
+\begin_layout Plain Layout
+
+
+\backslash
+end{equation}
 \end_layout
 
 \end_inset
@@ -451,103 +479,331 @@ foobar
 
 \end_layout
 
-\begin_layout EndFrame
+\begin_layout Standard
+we arrive at
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{equation}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+vec f = 
+\backslash
+nabla 
+\backslash
+cdot 
+\backslash
+tilde 
+\backslash
+sigma
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{equation}
+\end_layout
+
+\end_inset
+
 
 \end_layout
 
-\begin_layout Subsection
-Stuff
+\begin_layout Standard
+with
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{equation}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+sigma_{ij} = -E_i D_j + 
+\backslash
+frac{1}{2}
+\backslash
+delta_{ij}(E_kD_k)
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{equation}
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout BeginFrame
-Frame title
+The Maxwell Stress Tensor
 \end_layout
 
-\begin_layout Standard
-\begin_inset Box Frameless
-position "c"
-hor_pos "c"
-has_inner_box 1
-inner_pos "c"
-use_parbox 0
-use_makebox 0
-width "35col%"
-special "none"
-height "1in"
-height_special "totalheight"
+\begin_layout Itemize
+For the general case of a inhomogeneous material 
+\begin_inset ERT
 status open
 
 \begin_layout Plain Layout
-left part
+
+$ D_i = 
+\backslash
+epsilon_{ij}E_j $
 \end_layout
 
 \end_inset
 
 
-\begin_inset Box Frameless
-position "c"
-hor_pos "c"
-has_inner_box 1
-inner_pos "c"
-use_parbox 0
-use_makebox 0
-width "55col%"
-special "none"
-height "1in"
-height_special "totalheight"
+\end_layout
+
+\begin_layout Itemize
+The relative permitivity is a tensor which is represented in matrix form
+ as
+\begin_inset ERT
 status open
 
-\begin_layout Itemize
-right part bullet point
+\begin_layout Plain Layout
+
+
+\backslash
+begin{equation}
 \end_layout
 
-\begin_layout Itemize
-right part bullet point
+\begin_layout Plain Layout
+
+
+\backslash
+epsilon_{ij} = 
+\backslash
+left( 
+\backslash
+begin{matrix} 
+\backslash
+epsilon_{11} & 
+\backslash
+epsilon_{12} & 
+\backslash
+epsilon_{13} 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+epsilon_{21} & 
+\backslash
+epsilon_{22} & 
+\backslash
+epsilon_{23} 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+epsilon_{31} & 
+\backslash
+epsilon_{32} & 
+\backslash
+epsilon_{33} 
+\backslash
+end{matrix}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+right)
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{equation}
 \end_layout
 
 \end_inset
 
-
-\end_layout
-
-\begin_layout EndFrame
 
 \end_layout
 
 \begin_layout Section
-Section Title
+Weak formulation
 \end_layout
 
 \begin_layout Subsection
-Something
+Strong form for anisotropic Electrostatics
 \end_layout
 
 \begin_layout BeginFrame
-Frame title
+Strong Form
 \end_layout
 
 \begin_layout Standard
-Lorem ipsum
+The strong form of the time independent electrostatics PDE reads
 \end_layout
 
-\begin_layout Block
+\begin_layout Standard
 \begin_inset ERT
 status open
 
 \begin_layout Plain Layout
 
-<2->
+
+\backslash
+begin{subequations}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{align}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+nabla 
+\backslash
+cdot (
+\backslash
+tilde 
+\backslash
+epsilon 
+\backslash
+nabla 
+\backslash
+Phi) + 
+\backslash
+rho & = 0  & on 
+\backslash
+hspace{10 pt} V 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+Phi & = 0 , 
+\backslash
+hspace{10 pt }                         & on 
+\backslash
+hspace{10 pt} 
+\backslash
+Gamma_1 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+( 
+\backslash
+tilde 
+\backslash
+epsilon 
+\backslash
+nabla 
+\backslash
+Phi )
+\backslash
+cdot n & = g ,
+\backslash
+hspace{10 pt}          & on 
+\backslash
+hspace{10 pt}  
+\backslash
+Gamma_2 
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{align}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{subequations}
 \end_layout
 
 \end_inset
 
 
+\end_layout
+
+\begin_layout Standard
+Where 
 \begin_inset ERT
 status open
 
 \begin_layout Plain Layout
 
-{}
+$ 
+\backslash
+Phi $
+\end_layout
+
+\end_inset
+
+is the electrostatic scalar potential defined by 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$ 
+\backslash
+vec E = -
+\backslash
+nabla 
+\backslash
+Phi $
 \end_layout
 
 \end_inset
@@ -555,20 +811,129 @@ status open
 
 \end_layout
 
-\begin_layout Block
-code line
+\begin_layout EndFrame
+
 \end_layout
 
-\begin_layout Block
-code line
+\begin_layout BeginFrame
+Weak form of the problem
 \end_layout
 
-\begin_layout Block
-code line
+\begin_layout Standard
+The weak form, after inserting to the scalar potential the test and trial
+ functions, reads
 \end_layout
 
-\begin_layout Block
-code line
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{subequations}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{align}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+int_{
+\backslash
+Omega} (
+\backslash
+tilde 
+\backslash
+epsilon 
+\backslash
+nabla u ) 
+\backslash
+nabla v dV & = 
+\backslash
+int_{
+\backslash
+Gamma_1}
+\backslash
+rho v dV +
+\backslash
+int_{
+\backslash
+Gamma_2} g v dS
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+v & = 
+\backslash
+sum_i 
+\backslash
+psi_i 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+u & = 
+\backslash
+sum_i 
+\backslash
+psi_i w 
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{align}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{subequations}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Formulation in FreeFem++
+\end_layout
+
+\begin_layout Standard
+The variational problem is defined as:
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset include
+LatexCommand include
+filename "electrostaticVariational.tex"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout EndFrame
@@ -576,202 +941,214 @@ code line
 \end_layout
 
 \begin_layout Subsection
-Another section
+Elastostatics
 \end_layout
 
 \begin_layout BeginFrame
-Frame title
+Elastostatics
 \end_layout
 
 \begin_layout Standard
-asdf
+Stress - deformation relation:
 \end_layout
 
-\begin_layout EndFrame
-
-\end_layout
-
-\begin_layout BeginFrame
-Example code
-\end_layout
-
-\begin_layout Block
+\begin_layout Standard
+We define 
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Plain Layout
 
-{}
+$ u_i $
 \end_layout
 
 \end_inset
 
-boost::mpi::communicator c; 
-\begin_inset space ~
-\end_inset
+ the deformation along direction i,
+\begin_inset ERT
+status open
 
- // given comm
-\begin_inset Newline newline
-\end_inset
+\begin_layout Plain Layout
 
-while(true) {
-\begin_inset Newline newline
-\end_inset
-
-\SpecialChar \-
-
-\begin_inset space ~
-\end_inset
-
- try { c = duplicate(comm); }
-\begin_inset Newline newline
-\end_inset
-
-\SpecialChar \-
-
-\begin_inset space ~
-\end_inset
-
- catch(exception e) {
-\begin_inset Newline newline
-\end_inset
-
-\SpecialChar \-
-
-\begin_inset space ~
-\end_inset
-
- 
-\begin_inset space ~
-\end_inset
-
- revoke(comm); shrink(comm, new_comm);
-\begin_inset Newline newline
-\end_inset
-
-\SpecialChar \-
-
-\begin_inset space ~
-\end_inset
-
- 
-\begin_inset space ~
-\end_inset
-
-free(comm); comm = new_comm;
-\begin_inset Newline newline
-\end_inset
-
-\SpecialChar \-
-
-\begin_inset space ~
-\end_inset
-
- 
-\begin_inset space ~
-\end_inset
-
- 
-\color red
-continue
-\color inherit
-;
-\begin_inset Newline newline
-\end_inset
-
-\SpecialChar \-
-
-\begin_inset space ~
-\end_inset
-
- }
-\begin_inset Newline newline
-\end_inset
-
-\SpecialChar \-
-
-\begin_inset space ~
-\end_inset
-
- try { c.barrier(); 
-\color green
-break
-\color inherit
-; }
-\begin_inset Newline newline
-\end_inset
-
-\SpecialChar \-
-
-\begin_inset space ~
-\end_inset
-
- catch(exception e) { revoke(c); }
-\begin_inset Newline newline
-\end_inset
-
-}
-\begin_inset Newline newline
-\end_inset
-
-c = duplicate(comm); 
+$ 
+\backslash
+sigma_{ij} $
 \end_layout
 
-\begin_layout EndFrame
+\end_inset
 
+ is the stress tensor and 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$ e_{ij}=
+\backslash
+frac{1}{2}{u_i,j+u_j,i} $
 \end_layout
 
-\begin_layout Section
-Conclusions
-\end_layout
+\end_inset
 
-\begin_layout BeginFrame
-Summary
-\end_layout
-
-\begin_layout Itemize
-Foo
-\end_layout
-
-\begin_layout Itemize
-Bar
-\end_layout
-
-\begin_layout EndFrame
-
-\end_layout
-
-\begin_layout BeginFrame
-Outlook
-\end_layout
-
-\begin_layout Itemize
-asdf
-\end_layout
-
-\begin_layout Itemize
-asdf
-\end_layout
-
-\begin_layout Itemize
-asdf
-\end_layout
-
-\begin_layout EndFrame
-
-\end_layout
-
-\begin_layout BeginFrame
-Questions?
+is the strain tensor.
+ Then,
 \end_layout
 
 \begin_layout Standard
-\noindent
-\align center
+\begin_inset ERT
+status open
 
-\series bold
-\size larger
-Questions?
+\begin_layout Plain Layout
+
+
+\backslash
+begin{subequations} 
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{align}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+sigma_{ij} &= C_{ijkl} e_{kl}
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{align}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{subequations}
+\end_layout
+
+\end_inset
+
+where 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$ C_{ijkl} 
+\backslash
+hspace{5 pt} $
+\end_layout
+
+\end_inset
+
+is the fourth order stiffness matrix that allows for the couling of any
+ type of stress with any type of deformation (anisotropic materials).
+ 
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Lamé system
+\end_layout
+
+\begin_layout Standard
+We assumed the materials to be isotropic with respect to elastic response.
+ That allowes them to be modeled with the Lamé system and that allows for
+ a simpler variational formulation.
+ For full anisotropy all the shape function derivatives have to be taken
+ account of with possibly different material coefficients.
+\end_layout
+
+\begin_layout Standard
+Lamé description of the elastic material response reads:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{equation}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+sigma_{ij} = 
+\backslash
+lambda 
+\backslash
+delta_{ij} e_{kk} + 2 
+\backslash
+mu e_{ij} 
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{equation}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Formulation in FreeFem++
+\end_layout
+
+\begin_layout Standard
+The elastostatics formulation was based in the lame system (isotropic finite
+ strain elasticity).
+ Example from freefem manual:
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset include
+LatexCommand include
+filename "lame_elasticity.tex"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout BeginFrame
+Electroactive polymer structure
+\end_layout
+
+\begin_layout Standard
+A simple electroactive polymer structure was simulated as a proof of concept
+ example.
+ The material chosen is amorphous silicon with relative permitivity 
+\end_layout
+
+\begin_layout Standard
+()
 \end_layout
 
 \begin_layout EndFrame

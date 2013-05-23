@@ -1137,6 +1137,10 @@ filename "lame_elasticity.tex"
 
 \end_layout
 
+\begin_layout EndFrame
+
+\end_layout
+
 \begin_layout BeginFrame
 Electroactive polymer structure
 \end_layout
@@ -1144,11 +1148,272 @@ Electroactive polymer structure
 \begin_layout Standard
 A simple electroactive polymer structure was simulated as a proof of concept
  example.
- The material chosen is amorphous silicon with relative permitivity 
+ The structure has fixed displacements at left end and fixed electric potential
+ at top and bottom boundaries.
+ Calculations are done in dimensionless units.
 \end_layout
 
 \begin_layout Standard
-()
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{center}     
+\backslash
+begin{tabular}{ | l | l | l | p{5cm} |}     
+\backslash
+hline     
+\end_layout
+
+\begin_layout Plain Layout
+
+material & $ e_r $ & $ E_{elas} $ & $ 
+\backslash
+nu $ 
+\backslash
+
+\backslash
+ 
+\backslash
+hline
+\end_layout
+
+\begin_layout Plain Layout
+
+ mat1 & 11.8 & 800 & 0.49 
+\backslash
+
+\backslash
+ 
+\backslash
+hline
+\end_layout
+
+\begin_layout Plain Layout
+
+mat2 & 5.8 & 40 & 0.49 
+\backslash
+
+\backslash
+ 
+\backslash
+hline
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{tabular} 
+\backslash
+end{center} 
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+includegraphics[height=4cm]{images/undeformedMesh.pdf}%
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Electroactive polymer structure
+\end_layout
+
+\begin_layout Standard
+Results (electric potential defines the induced stress and hence the induced
+ body forces)
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{align}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+includegraphics[height=3cm]{images/T11.pdf}&
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+includegraphics[height=3cm]{images/T12.pdf} 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+includegraphics[height=3cm]{images/T22.pdf}&
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+includegraphics[height=3cm]{images/phi.pdf}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{align}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Electroactive polymer structure
+\end_layout
+
+\begin_layout Standard
+Homogeneous structure - fixed base
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{align}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+includegraphics[height=3cm]{images/eps11.pdf}&
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+includegraphics[height=3cm]{images/eps12.pdf}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{align}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+includegraphics[height=3cm]{images/eps22.pdf}
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Electroactive polymer structure
+\end_layout
+
+\begin_layout Standard
+Homogeneous structure - fixed base and top
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{align}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+includegraphics[height=3cm]{images/eps11_2.pdf}&
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+includegraphics[height=3cm]{images/eps12_2.pdf}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{align}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+includegraphics[height=3cm]{images/eps22_2.pdf}
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout EndFrame
