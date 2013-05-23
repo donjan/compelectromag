@@ -12,6 +12,7 @@
  ******************************************************************************/
 
 
+load "Element_P3"
 include "borders.idp"
 include "linalg.idp"
 include "misc.idp"
@@ -24,18 +25,10 @@ real chargedens = -10;
 
 real[int] epsilon1(9);
 real[int] epsilon2(9);
+real[int] epsilon3(9);
 
 real e0 = 8.854187 *1;
-real epsHi = 1e6*e0;
-real epsMid = 2.2*e0;
-real epsLo = 1.*e0;
 
-<<<<<<< HEAD
-epsilon2 = [ 1.*e0, 0,     0,
-             0,     1.*e0, 0,
-             0,     0,     1.*e0 ];
-//epsilon1=epsilon2;
-=======
 epsilon1 = 2.2*e0 * [ 1, 0, 0,
                       0, 1, 0,
                       0, 0, 1 ];
@@ -56,44 +49,29 @@ epsilon3 = 1.0*e0 * [ 1, 0, 0,           // ball = isolator
                       0, 1, 0,
                       0, 0, 1 ];
 
->>>>>>> 80b1042fedd955f921db1ab0a147bf5d54347caa
-
-
 // Geometry parameters
 
 real[int] ballpos(2);
-ballpos = [1.5, 1.5];
+ballpos = [1., 4.];
 real ballr = 0.5;
 //~ int ballh = 60;
 //~ int frameh = 90;
-<<<<<<< HEAD
-int ballh = 20;
-int frameh = 40;
-=======
 //~ int ballh = 20;
 //~ int frameh = 40;
 int ballh = 15;
 int frameh = 20;
->>>>>>> 80b1042fedd955f921db1ab0a147bf5d54347caa
 
 real[int] ballposold = ballpos;
 
 
 // Simulation parameters
-<<<<<<< HEAD
-real dt = 0.2;
-real tend = dt*12;
-real switchtime = tend/2;
-real phiCup = 2;   // constrain phi on upper border
-real phiCdown = -2;  // constrain phi on lower border
-=======
 
 real dt = 0.1;
 real tend = dt*30;
 real switchtime = tend/2;
 real phiChi = 2;      // high constraint for phi
 real phiClo = -2;     // low constraint for phi
->>>>>>> 80b1042fedd955f921db1ab0a147bf5d54347caa
+
 real[int] ballv(2);
 ballv = [0, 0];
 
@@ -103,29 +81,6 @@ ballv = [0, 0];
 int Lball = 101, Lboxo = 102, Lboxi = 103,
     Lboxdown = 104, Lboxright = 105, Lboxup = 106, Lboxleft = 107,
     Lballenv = 108;
-//~ 
-//~ borderLineCycle4([-1,0], Bod, Lboxdown,
-                 //~ [ 5,0], Bor, Lboxright,
-                 //~ [ 5,5], Bou, Lboxup,
-                 //~ [-1,5], Bol, Lboxleft)
-
-borderLineCycle4([0,0], Bod, Lboxdown,
-                 [ 3,0], Bor, Lboxright,
-                 [ 3,3], Bou, Lboxup,
-                 [0,3], Bol, Lboxleft)
-//~ 
-//~ borderLineCycle7([-0.9, 0.1], Bid,  Lboxi,
-                 //~ [ 4.9, 0.1], Bir,  Lboxi,
-                 //~ [ 4.9, 3.1], Bii1, Lboxi,
-                 //~ [ 3.5, 3.1], Bii2, Lboxi,
-                 //~ [ 2  , 4  ], Bii3, Lboxi,
-                 //~ [ 2  , 4.9], Biu,  Lboxi,
-                 //~ [-0.9, 4.9], Bil,  Lboxi)
-
-<<<<<<< HEAD
-macro bordersNonball(n) Bod(n) + Bor(n) + Bou(n) + Bol(n)// EOM
-  /*+ Bid(n) + Bir(n) + Bii1(n/3) + Bii2(n/3) + Bii3(n/3) + Biu(n) + Bil(n)*/ 
-=======
 int Label1 = Lboxdown, Label2 = Lboxup;
 
 
@@ -134,13 +89,6 @@ borderLineCycle4([-1,0], Bod, Lboxdown,
                  [ 5,5], Bou, Lboxup,
                  [-1,5], Bol, Lboxleft)
 
-//~ borderLineCycle7([-0.9, 0.1], Bid,  Lboxi,
-//~                  [ 4.9, 0.1], Bir,  Lboxi,
-//~                  [ 4.9, 3.1], Bii1, Lboxi,
-//~                  [ 3.5, 3.1], Bii2, Lboxi,
-//~                  [ 2  , 4  ], Bii3, Lboxi,
-//~                  [ 2  , 4.9], Biu,  Lboxi,
-//~                  [-0.9, 4.9], Bil,  Lboxi)
 borderLineCycle8([3, 0.1], Bid,  Lboxi,
                  [ 4.9, 0.1], Bir,  Lboxi,
                  [ 4.9, 3.1], Bii1, Lboxi,
@@ -150,11 +98,8 @@ borderLineCycle8([3, 0.1], Bid,  Lboxi,
                  [-0.9, 4.9], Bil,  Lboxi,
                  [-0.9, 3], Bil2,  Lboxi)
 
-//~ macro bordersNonball(n) Bod(n) + Bor(n) + Bou(n) + Bol(n)
-//~   + Bid(n) + Bir(n) + Bii1(n/3) + Bii2(n/3) + Bii3(n/3) + Biu(n) + Bil(n) // EOM
 macro bordersNonball(n) Bod(n) + Bor(n) + Bou(n) + Bol(n)
   + Bid(n) + Bir(n) + Bii1(n/3) + Bii2(n/3) + Bii3(n/3) + Biu(n) + Bil(n) + Bil2(n) // EOM
->>>>>>> 80b1042fedd955f921db1ab0a147bf5d54347caa
 
 border B(t=0,2*pi) {
   x = ballpos[0]+ballr*cos(t);
@@ -182,25 +127,23 @@ for(real tau=0; tau < tend; tau+=dt) {
   fespace Ph(Allh,P0);
 
   Ph reg = region;
-<<<<<<< HEAD
-  int rE  = reg(2.9,2.9);                        // frame
-  int rI  = reg(2.9,2.9);                        // vacuum
-  int rB  = reg(ballpos[0],ballpos[1]);  // ball region
-=======
   int rE  = reg( 4.95,4.95);                        // frame
   int rI  = reg( 2.5 ,1   );                        // vacuum
   int rB  = reg(ballpos[0],ballpos[1]);      // ball region
->>>>>>> 80b1042fedd955f921db1ab0a147bf5d54347caa
 
-  macro rEps(num) (reg==rE||reg==rB)*epsilon1[num] + (reg==rI)*epsilon2[num]  // EOM
+  macro rEps(num) (reg==rE)*epsilon1[num]
+                + (reg==rI)*epsilon2[num]
+                + (reg==rB)*epsilon3[num]  // EOM
   func EPS = [ [ rEps(0), rEps(1), rEps(2) ],
                [ rEps(3), rEps(4), rEps(5) ],
                [ rEps(6), rEps(7), rEps(8) ] ];
 
+  func source = (reg==rE)*0 + (reg==rI)*0 + (reg==rB)*chargedens;
+
 
   // Setup
 
-  fespace Vh(Allh,P2);
+  fespace Vh(Allh,P3);
   Vh phi, w;
 
   if(timedist(tau, 0.2*tend, dt)) {
@@ -213,22 +156,17 @@ for(real tau=0; tau < tend; tau+=dt) {
 
 
   // Solve the problem
-  problem LaplaceVarf(phi,w,solver=CG) = int2d(Allh,qft=qf5pT)(
+
+  problem PoissonVarf(phi,w,solver=CG) = int2d(Allh)(
       EPS[0][0] * dx(phi)*dx(w)
     + EPS[0][1] * dx(phi)*dy(w)
     + EPS[1][0] * dy(phi)*dx(w)
-<<<<<<< HEAD
-    + EPS[1][1] * dy(phi)*dy(w))
-    + on(Lboxup,phi = phiCup)
-    + on(Lboxdown,phi = phiCdown)
-=======
     + EPS[1][1] * dy(phi)*dy(w) )
     - int2d(Allh)( source*w )
     + on(Label1,phi = phiChi)
     + on(Label2,phi = phiClo)
->>>>>>> 80b1042fedd955f921db1ab0a147bf5d54347caa
     ;
-  LaplaceVarf;
+  PoissonVarf;
 
 
   // Calculate the stress tensor
@@ -247,77 +185,25 @@ for(real tau=0; tau < tend; tau+=dt) {
   // Calculate the forces and apply collapsed Velocity Verlet on ball position
   // TODO: derivation in formulas.lyx
 
-//~ Vh a1 = dx(phi);
-//~ Vh a2 = dy(a1);
-//~ plot3d(a2, "single diffs");
-//~ Vh a3 = dyx(phi);
-//~ plot3d(a2, "multi diffs");
-//~ 
-//~ exit(0);
 
-
-
-
-//~ Vh XX1 = dy(T[3]);                          // should be ~0
-//~ plot2d(XX1 ,"naive");
-//~ Vh T3a = -E[1]*D[0];
-//~ Vh XX3 = dy(T3a);
-//~ plot3d(XX3 ,"dyad");
-//~ Vh T3b = - EPS[0][0]*E[1]*E[0] - EPS[0][1]*E[1]*E[1] - EPS[0][2]*E[1]*E[2];
-//~ Vh XX4 = dy(T3b);
-//~ plot3d(XX4 ,"full E");
-//~ Vh T3c = - EPS[0][0]*(-dy(phi))*(-dx(phi)) - EPS[0][1]*(-dy(phi))*(-dy(phi)) - 0;
-//~ Vh XX5 = dy(T3c);
-//~ plot3d(XX5 ,"full E with phi");
-///////////////////////////////////////////////////////////////////////
-//Motivation:
-//
-//http://www.sciencedirect.com/science/article/pii/S0304388613000661
-//
-//Induced-charge electrokinetic phenomena
-//Martin Z. Bazant a,b,⁎, Todd M. Squires c
-//~ Vh XX6a = - EPS[0][0]*(    dy(phi)*dx(phi)    );
-//~ Vh XX6b = - EPS[0][1]*(    dy(phi)*dy(phi)    );
-//~ Vh XX6c = XX6a /*+XX6b*/;
-//~ Vh XX6 = dy(XX6c);
-//~ plot2d(XX6 ,"full E with phi, split");
-//~ Vh XX7a = - EPS[0][0]*(    dyy(phi)*dx(phi) + dy(phi)*dyx(phi)   );
-//~ Vh XX7b = - EPS[0][1]*(    dyy(phi)*dy(phi) * 2   );
-//~ Vh XX7 = XX7a /*+XX7b*/;
-//~ plot2d(XX7 ,"full E with phi dmul");
-//~ Vh XX2 = - EPS[1][0]*(dyy(phi)*E[0]+E[1]*dyx(phi)) - EPS[1][1]*(2*dyy(phi)*E[1]);                          // should be ~0
-//~ plot3d(XX2 ,"dmul");
-//~ exit(0);
-//~ Vh Xa = dy( - EPS[0][0]*(     dy(phi)*dx(phi)                 )  - EPS[0][1]*(     dy(phi)*dy(phi)    ) );
-//~ Vh Xb =     - EPS[0][1]*( dyy(phi)*dx(phi) + dy(phi)*dyx(phi) )  - EPS[0][1]*(    dyy(phi)*dy(phi) * 2   );
 
   //~ Vh fx = dx(T[0]) - EPS[1][0]*(dyy(phi)*E[0]+E[1]*dyx(phi)) - EPS[1][1]*(2*dyy(phi)*E[1]);
   //~ Vh fy = - EPS[0][0]*(2*dxx(phi)*E[0]) - EPS[0][1]*(dxx(phi)*E[1]+E[0]*dxy(phi)) + dy(T[4]);
 
-
-  Vh fx = dx(T[0])+dy(T[3]);                          // should be ~0
-  Vh fy = dx(T[1])+dy(T[4]);
+  Vh fx = dx(T[0]) - EPS[0][0]*(dyy(phi)*dx(phi)+dy(phi)*dyx(phi)) - EPS[0][1]*(2*dyy(phi)*dy(phi));
+  Vh fy = - EPS[1][0]*(dxx(phi)*dx(phi)*2) - EPS[1][1]*(dxx(phi)*dy(phi)+dx(phi)*dxy(phi)) + dy(T[4]);
+  fx = -fx;
+  fy = -fy;
 
   //~ real Fx = int1d(Ballh, Lball) (fx*N.x);
   //~ real Fy = int1d(Ballh, Lball) (fy*N.y);
   real Fx = int2d(Ballh) (fx);  // same as above
   real Fy = int2d(Ballh) (fy);
 
-<<<<<<< HEAD
-//calculate the stokes drag:
-//
-
-=======
-  Vh fx = dx(T[0]) - EPS[0][0]*(dyy(phi)*dx(phi)+dy(phi)*dyx(phi)) - EPS[0][1]*(2*dyy(phi)*dy(phi));
-  Vh fy = - EPS[1][0]*(dxx(phi)*dx(phi)*2) - EPS[1][1]*(dxx(phi)*dy(phi)+dx(phi)*dxy(phi)) + dy(T[4]);
-  fx = -fx;
-  fy = -fy;
-
 //~   real Fx = int1d(Ballh, Lball) (fx*N.x);
 //~   real Fy = int1d(Ballh, Lball) (fy*N.y);
   real Fx = int2d(Ballh) (fx);  // same as above
   real Fy = int2d(Ballh) (fy);
->>>>>>> 80b1042fedd955f921db1ab0a147bf5d54347caa
 
   ballv[0] += Fx * dt / 1.;                           // ball mass := 1
   ballpos[0] = 2*ballpos[0] - ballposold[0] + dt*ballv[0];
@@ -335,7 +221,7 @@ for(real tau=0; tau < tend; tau+=dt) {
 //~   plot2d(T[1], "T12");
 //~   plot2d(T[3], "T21");
 //~   plot2d(T[4], "T22");
-  plot2d([fx, fy], "force field, Fx: " + Fx + ", Fy: " + Fy);
+//~   plot2d([fx, fy], "force field, Fx: " + Fx + ", Fy: " + Fy);
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -344,8 +230,8 @@ for(real tau=0; tau < tend; tau+=dt) {
   macro plotenv2(t1, t2, v1, v2, lab) Venvh t1=v1; Venvh t2=v2; plot2d([t1,t2], lab); // EOM
 
   border Benv(t=0,2*pi) { x = ballposold[0]+2*ballr*cos(t); y = ballposold[1]+2*ballr*sin(t); label = Lballenv; }
-  mesh Envh = buildmesh(Benv(3*ballh));
-  fespace Venvh(Envh, P2);
+  mesh Envh = buildmesh(Benv(2*ballh));
+  fespace Venvh(Envh, P3);
 //~   plot2d(Envh, "env mesh");
 
 //~   plotenv(ephi, phi, "phi");
@@ -362,7 +248,7 @@ for(real tau=0; tau < tend; tau+=dt) {
 //~   plotenv(edyT12, dy(T[1]), "dy(T12)");
 
 //~   plotenv2(efx, efy, fx, fy, "t=" + tau + ", force field, Fx: " + Fx + ", Fy: " + Fy);
-  of << tau << "  " << Fx << "  " << Fy << endl;
+//~   of << tau << "  " << Fx << "  " << Fy << endl;
 ////////////////////////////////////////////////////////////////////////////////
 
   ballposold = ballpos;

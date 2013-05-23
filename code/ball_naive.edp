@@ -13,42 +13,40 @@
 
 load "Element_P3"
 include "borders.idp"
-
-macro plot3d(obj, label) plot(obj, fill=true, value=true, ShowAxes=true, dim=3, wait=true, cmm = label); // EOM
-macro plot2d(obj, label) plot(obj, fill=true, value=true, ShowAxes=true, dim=2, wait=true, cmm = label); // EOM
+include "linalg.idp"
+include "misc.idp"
 
 
 // Material parameters
 
-real e0 = 8.854187 *1;
+//~ real chargedens = 0;
+real chargedens = -10;
+
 real[int] epsilon1(9);
 real[int] epsilon2(9);
 real[int] epsilon3(9);
 
-epsilon1 = [ 2.2*e0,      0,      0,
-                  0, 2.2*e0,      0,
-                  0,      0, 2.2*e0 ];
+real e0 = 8.854187 *1;
 
-epsilon2 = [ 1.*e0, 0,     0,
-             0,     1.*e0, 0,
-             0,     0,     1.*e0 ];
+epsilon1 = 2.2*e0 * [ 1, 0, 0,
+                      0, 1, 0,
+                      0, 0, 1 ];
 
-//~ epsilon3 = [ 1e6*e0, 0,      0,           // ball = conductor
-//~              0,      1e6*e0, 0,
-//~              0,      0,      1e6*e0 ];
+epsilon2 = 1.0*e0 * [ 1, 0, 0,
+                      0, 1, 0,
+                      0, 0, 1 ];
 
-epsilon3 = [ 2.2*e0, 0,      0,           // ball = dielectric
-             0,      2.2*e0, 0,
-             0,      0,      2.2*e0 ];
+//~ epsilon3 = 1e6*e0 * [ 1, 0, 0,           // ball = conductor
+//~                       0, 1, 0,
+//~                       0, 0, 1 ];
 
-//~ epsilon3 = [ 1.*e0, 0,     0,           // ball = isolator
-//~              0,     1.*e0, 0,
-//~              0,     0,     1.*e0 ];
+//~ epsilon3 = 2.2*e0 * [ 1, 0, 0,           // ball = dielectric
+//~                       0, 1, 0,
+//~                       0, 0, 1 ];
 
-
-real chargedens = 0;
-//~ real chargedens = 30;
-
+epsilon3 = 1.0*e0 * [ 1, 0, 0,           // ball = isolator
+                      0, 1, 0,
+                      0, 0, 1 ];
 
 // Geometry parameters
 
@@ -57,22 +55,22 @@ ballpos = [1., 4.];
 real ballr = 0.5;
 //~ int ballh = 60;
 //~ int frameh = 90;
-int ballh = 20;
-int frameh = 40;
-//~ int ballh = 10;
-//~ int frameh = 20;
+//~ int ballh = 20;
+//~ int frameh = 40;
+int ballh = 15;
+int frameh = 20;
 
 real[int] ballposold = ballpos;
 
 
 // Simulation parameters
 
-real dt = 0.2;
-//~ real dt = 10.;  // for conductor
-real tend = dt*12;
+real dt = 0.1;
+real tend = dt*30;
 real switchtime = tend/2;
-real phiChi = 2;   // constrain phi on upper border
-real phiClo = -2;  // constrain phi on lower border
+real phiChi = 2;      // high constraint for phi
+real phiClo = -2;     // low constraint for phi
+
 real[int] ballv(2);
 ballv = [0, 0];
 
@@ -82,22 +80,25 @@ ballv = [0, 0];
 int Lball = 101, Lboxo = 102, Lboxi = 103,
     Lboxdown = 104, Lboxright = 105, Lboxup = 106, Lboxleft = 107,
     Lballenv = 108;
+int Label1 = Lboxdown, Label2 = Lboxup;
+
 
 borderLineCycle4([-1,0], Bod, Lboxdown,
                  [ 5,0], Bor, Lboxright,
                  [ 5,5], Bou, Lboxup,
                  [-1,5], Bol, Lboxleft)
 
-borderLineCycle7([-0.9, 0.1], Bid,  Lboxi,
+borderLineCycle8([3, 0.1], Bid,  Lboxi,
                  [ 4.9, 0.1], Bir,  Lboxi,
                  [ 4.9, 3.1], Bii1, Lboxi,
                  [ 3.5, 3.1], Bii2, Lboxi,
                  [ 2  , 4  ], Bii3, Lboxi,
                  [ 2  , 4.9], Biu,  Lboxi,
-                 [-0.9, 4.9], Bil,  Lboxi)
+                 [-0.9, 4.9], Bil,  Lboxi,
+                 [-0.9, 3], Bil2,  Lboxi)
 
 macro bordersNonball(n) Bod(n) + Bor(n) + Bou(n) + Bol(n)
-  + Bid(n) + Bir(n) + Bii1(n/3) + Bii2(n/3) + Bii3(n/3) + Biu(n) + Bil(n) // EOM
+  + Bid(n) + Bir(n) + Bii1(n/3) + Bii2(n/3) + Bii3(n/3) + Biu(n) + Bil(n) + Bil2(n) // EOM
 
 border B(t=0,2*pi) {
   x = ballpos[0]+ballr*cos(t);
@@ -108,25 +109,10 @@ border B(t=0,2*pi) {
 
 // Some linear algebra helper macros
 
-macro mulMv(res, M, v)
-  res[0] = M[0][0]*v[0] + M[0][1]*v[1] + M[0][2]*v[2];
-  res[1] = M[1][0]*v[0] + M[1][1]*v[1] + M[1][2]*v[2];
-  res[2] = M[2][0]*v[0] + M[2][1]*v[1] + M[2][2]*v[2];
-// EOM
-
-macro dyad(res, a, b)
-  res[0] = a[0]*b[0]; res[1] = a[0]*b[1]; res[2] = a[0]*b[2];
-  res[3] = a[1]*b[0]; res[4] = a[1]*b[1]; res[5] = a[1]*b[2];
-  res[6] = a[2]*b[0]; res[7] = a[2]*b[1]; res[8] = a[2]*b[2];
-// EOM
-
-macro dotp(a, b)
-  ( a[0]*b[0] + a[1]*b[1] + a[2]*b[2] )
-// EOM
-
 
 ////////////////////////////////////////////////////////////////////////////////
-ofstream of("forces"); 
+
+//~ ofstream of("forces");
 for(real tau=0; tau < tend; tau+=dt) {
 
   // Build meshes
@@ -138,10 +124,11 @@ for(real tau=0; tau < tend; tau+=dt) {
   // Define regions and set material parameters accordingly
 
   fespace Ph(Allh,P0);
+
   Ph reg = region;
-  int rE  = reg(4,4);                        // frame
-  int rI  = reg(0,4);                        // vacuum
-  int rB  = reg(ballpos[0],ballpos[1]);  // ball region
+  int rE  = reg( 4.95,4.95);                        // frame
+  int rI  = reg( 2.5 ,1   );                        // vacuum
+  int rB  = reg(ballpos[0],ballpos[1]);      // ball region
 
   macro rEps(num) (reg==rE)*epsilon1[num]
                 + (reg==rI)*epsilon2[num]
@@ -158,11 +145,13 @@ for(real tau=0; tau < tend; tau+=dt) {
   fespace Vh(Allh,P3);
   Vh phi, w;
 
-  if(abs(tau-switchtime)<dt/2) {
-    real tmp = phiChi; phiChi = phiClo; phiClo = tmp;
+  if(timedist(tau, 0.2*tend, dt)) {
+    Label1 = Lboxright;
+    Label2 = Lboxleft;
   }
-  int Label1 = Lboxup;
-  int Label2 = Lboxdown;
+  if(timedist(tau, 0.6*tend, dt)) {
+    swap(phiClo, phiChi, real, tmp);
+  }
 
 
   // Solve the problem
@@ -196,11 +185,13 @@ for(real tau=0; tau < tend; tau+=dt) {
 
   Vh fx = dx(T[0])+dy(T[3]);                          // should be ~0
   Vh fy = dx(T[1])+dy(T[4]);
+  fx = -fx;
+  fy = -fy;
 
-  real Fx = int1d(Ballh, Lball) (fx*N.x);
-  real Fy = int1d(Ballh, Lball) (fy*N.y);
-//~   real Fx = int2d(Ballh) (fx);  // same as above
-//~   real Fy = int2d(Ballh) (fy);
+//~   real Fx = int1d(Ballh, Lball) (fx*N.x);
+//~   real Fy = int1d(Ballh, Lball) (fy*N.y);
+  real Fx = int2d(Ballh) (fx);  // same as above
+  real Fy = int2d(Ballh) (fy);
 
   ballv[0] += Fx * dt / 1.;                           // ball mass := 1
   ballpos[0] = 2*ballpos[0] - ballposold[0] + dt*ballv[0];

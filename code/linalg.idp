@@ -1,0 +1,27 @@
+/*******************************************************************************
+ * 
+ * Some linear algebra helper macros
+ * 
+ ******************************************************************************/
+
+// IN: vector of length 3; vector of length 3
+// OUT: scalar (directly returned)
+macro dotp(a, b)
+  ( a[0]*b[0] + a[1]*b[1] + a[2]*b[2] )
+// EOM
+
+// IN: matrix 2dim 3x3 vector; vector of length 3
+// OUT: vector of length 3
+macro mulMv(res, M, v)
+  res[0] = M[0][0]*v[0] + M[0][1]*v[1] + M[0][2]*v[2];
+  res[1] = M[1][0]*v[0] + M[1][1]*v[1] + M[1][2]*v[2];
+  res[2] = M[2][0]*v[0] + M[2][1]*v[1] + M[2][2]*v[2];
+// EOM
+
+// IN: vector of length 3; vector of length 3
+// OUT: vector of length 9
+macro dyad(res, a, b)
+  res[0] = a[0]*b[0]; res[1] = a[0]*b[1]; res[2] = a[0]*b[2];
+  res[3] = a[1]*b[0]; res[4] = a[1]*b[1]; res[5] = a[1]*b[2];
+  res[6] = a[2]*b[0]; res[7] = a[2]*b[1]; res[8] = a[2]*b[2];
+// EOM

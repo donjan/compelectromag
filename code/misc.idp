@@ -1,0 +1,22 @@
+/*******************************************************************************
+ * 
+ * Miscellaneous helpers
+ * 
+ ******************************************************************************/
+
+macro plot2d(obj, label) plot(obj, fill=true, value=true,
+             ShowAxes=true, dim=2, wait=true, cmm = label);
+// EOM
+
+macro plot3d(obj, label) plot(obj, fill=true, value=true,
+             ShowAxes=true, dim=3, wait=true, cmm = label);
+// EOM
+
+
+func bool timedist(real tau, real target, real dt) {
+  return abs(tau-target)<dt/2;
+}
+
+macro swap(a, b, type, tmp)
+  type tmp = a; a = b; b = tmp;
+// EOM
