@@ -33,13 +33,13 @@ epsilon2 = [ 1.*e0, 0,     0,
              0,     1.*e0, 0,
              0,     0,     1.*e0 ];
 
-epsilon3 = [ 2.2*e0, 0,      0,           // ball = dielectric
-             0,      2.2*e0, 0,
-             0,      0,      2.2*e0 ];
-
 //~ epsilon3 = [ 1e6*e0, 0,      0,           // ball = conductor
 //~              0,      1e6*e0, 0,
 //~              0,      0,      1e6*e0 ];
+
+epsilon3 = [ 2.2*e0, 0,      0,           // ball = dielectric
+             0,      2.2*e0, 0,
+             0,      0,      2.2*e0 ];
 
 //~ epsilon3 = [ 1.*e0, 0,     0,           // ball = isolator
 //~              0,     1.*e0, 0,
@@ -71,8 +71,8 @@ real dt = 0.2;
 //~ real dt = 10.;  // for conductor
 real tend = dt*12;
 real switchtime = tend/2;
-real phiCup = -2;   // constrain phi on upper border
-real phiCdown = 2;  // constrain phi on lower border
+real phiChi = 2;   // constrain phi on upper border
+real phiClo = -2;  // constrain phi on lower border
 real[int] ballv(2);
 ballv = [0, 0];
 
@@ -159,8 +159,10 @@ for(real tau=0; tau < tend; tau+=dt) {
   Vh phi, w;
 
   if(abs(tau-switchtime)<dt/2) {
-    real tmp = phiCup; phiCup = phiCdown; phiCdown = tmp;
+    real tmp = phiChi; phiChi = phiClo; phiClo = tmp;
   }
+  int Label1 = Lboxup;
+  int Label2 = Lboxdown;
 
 
   // Solve the problem
@@ -171,8 +173,8 @@ for(real tau=0; tau < tend; tau+=dt) {
     + EPS[1][0] * dy(phi)*dx(w)
     + EPS[1][1] * dy(phi)*dy(w) )
     - int2d(Allh)( source*w )
-    + on(Lboxup,phi = phiCup)
-    + on(Lboxdown,phi = phiCdown)
+    + on(Label1,phi = phiChi)
+    + on(Label2,phi = phiClo)
     ;
   PoissonVarf;
 
