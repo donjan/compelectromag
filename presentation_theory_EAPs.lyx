@@ -1137,8 +1137,12 @@ filename "lame_elasticity.tex"
 
 \end_layout
 
-\begin_layout EndFrame
+\begin_layout Section
+Elastostatics - results
+\end_layout
 
+\begin_layout Subsection
+Material parameters
 \end_layout
 
 \begin_layout BeginFrame
@@ -1228,8 +1232,8 @@ includegraphics[height=4cm]{images/undeformedMesh.pdf}%
 
 \end_layout
 
-\begin_layout EndFrame
-
+\begin_layout Subsection
+Results - composite structure
 \end_layout
 
 \begin_layout BeginFrame
@@ -1298,6 +1302,78 @@ end{align}
 
 \begin_layout EndFrame
 
+\end_layout
+
+\begin_layout BeginFrame
+Electroactive polymer structure
+\end_layout
+
+\begin_layout Standard
+Results (electric potential defines the induced stress and hence the induced
+ body forces)
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{align}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+includegraphics[height=3cm]{images/eps11_3.pdf}&
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+includegraphics[height=3cm]{images/eps12_3.pdf} 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+includegraphics[height=3cm]{images/eps22_3.pdf}&
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+includegraphics[height=3cm]{images/uv_3.pdf}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{align}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Subsection
+Results - homogeneous structure
 \end_layout
 
 \begin_layout BeginFrame
