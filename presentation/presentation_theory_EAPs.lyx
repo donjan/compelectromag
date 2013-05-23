@@ -238,7 +238,7 @@ tableofcontents[currentsection,currentsubsection]
 
 \begin_layout Standard
 \begin_inset Note Note
-status collapsed
+status open
 
 \begin_layout Plain Layout
 If you wish to uncover everything in a step-wise fashion, uncomment the
@@ -280,380 +280,19 @@ LatexCommand tableofcontents
 
 \end_layout
 
-\begin_layout Section
-Introduction
-\end_layout
-
-\begin_layout Subsection
-Motivation/Goals
-\end_layout
-
-\begin_layout BeginFrame
-Motivation
-\end_layout
-
-\begin_layout Itemize
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-<1->
-\end_layout
-
-\end_inset
-
-Electrostrictive materials - Electroactive polymers (Artificial Muscles)
-\begin_inset VSpace medskip
-\end_inset
-
-
-\end_layout
-
-\begin_layout Itemize
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-<2->
-\end_layout
-
-\end_inset
-
-Oil and fuel puriffication 
-\begin_inset VSpace medskip
-\end_inset
-
-
-\end_layout
-
-\begin_layout EndFrame
-
-\end_layout
-
-\begin_layout BeginFrame
-Goals
-\end_layout
-
-\begin_layout Itemize
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-<1->
-\end_layout
-
-\end_inset
-
-Anisotropic Electrostatics
-\begin_inset VSpace medskip
-\end_inset
-
-
-\end_layout
-
-\begin_layout Itemize
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-<2->
-\end_layout
-
-\end_inset
-
-Electrostatic (Maxwell) stress coupled with elasticity
-\end_layout
-
-\begin_layout Itemize
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-<3->
-\end_layout
-
-\end_inset
-
-Electrostatic forces moving a ball
-\end_layout
-
-\begin_layout Itemize
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-<4->
-\end_layout
-
-\end_inset
-
-Gaining experience using open source Finite Element software for electromagnetic
-s
-\end_layout
-
-\begin_layout EndFrame
-
-\end_layout
-
-\begin_layout BeginFrame
-The Maxwell Stress Tensor
-\end_layout
-
 \begin_layout Standard
-The Lorentz Force Law in the presence of an electrostatic field reads:
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-begin{equation}
-\end_layout
-
-\begin_layout Plain Layout
-
-f = 
-\backslash
-rho 
-\backslash
-vec E
-\end_layout
-
-\begin_layout Plain Layout
-
-
-\backslash
-end{equation}
-\end_layout
+\begin_inset CommandInset include
+LatexCommand include
+filename "1.Introduction.lyx"
 
 \end_inset
 
 
-\end_layout
-
-\begin_layout Standard
-and taking into account
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
+\begin_inset Note Note
 status open
 
 \begin_layout Plain Layout
-
-
-\backslash
-begin{equation}
-\end_layout
-
-\begin_layout Plain Layout
-
-
-\backslash
-nabla 
-\backslash
-vec D = 
-\backslash
-rho
-\end_layout
-
-\begin_layout Plain Layout
-
-
-\backslash
-end{equation}
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-we arrive at
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-begin{equation}
-\end_layout
-
-\begin_layout Plain Layout
-
-
-\backslash
-vec f = 
-\backslash
-nabla 
-\backslash
-cdot 
-\backslash
-tilde 
-\backslash
-sigma
-\end_layout
-
-\begin_layout Plain Layout
-
-
-\backslash
-end{equation}
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-with
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-begin{equation}
-\end_layout
-
-\begin_layout Plain Layout
-
-
-\backslash
-sigma_{ij} = -E_i D_j + 
-\backslash
-frac{1}{2}
-\backslash
-delta_{ij}(E_kD_k)
-\end_layout
-
-\begin_layout Plain Layout
-
-
-\backslash
-end{equation}
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout BeginFrame
-The Maxwell Stress Tensor
-\end_layout
-
-\begin_layout Itemize
-For the general case of a inhomogeneous material 
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-$ D_i = 
-\backslash
-epsilon_{ij}E_j $
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Itemize
-The relative permitivity is a tensor which is represented in matrix form
- as
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-begin{equation}
-\end_layout
-
-\begin_layout Plain Layout
-
-
-\backslash
-epsilon_{ij} = 
-\backslash
-left( 
-\backslash
-begin{matrix} 
-\backslash
-epsilon_{11} & 
-\backslash
-epsilon_{12} & 
-\backslash
-epsilon_{13} 
-\backslash
-
-\backslash
-
-\end_layout
-
-\begin_layout Plain Layout
-
-
-\backslash
-epsilon_{21} & 
-\backslash
-epsilon_{22} & 
-\backslash
-epsilon_{23} 
-\backslash
-
-\backslash
-
-\end_layout
-
-\begin_layout Plain Layout
-
-
-\backslash
-epsilon_{31} & 
-\backslash
-epsilon_{32} & 
-\backslash
-epsilon_{33} 
-\backslash
-end{matrix}
-\end_layout
-
-\begin_layout Plain Layout
-
-
-\backslash
-right)
-\end_layout
-
-\begin_layout Plain Layout
-
-
-\backslash
-end{equation}
+Basic overview
 \end_layout
 
 \end_inset
@@ -663,6 +302,19 @@ end{equation}
 
 \begin_layout Section
 Weak formulation
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Theory (strong, weak) + FreeFem code
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsection
@@ -1132,371 +784,41 @@ The elastostatics formulation was based in the lame system (isotropic finite
 \end_layout
 
 \begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+input{lame_elasticity.tex}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 \begin_inset CommandInset include
 LatexCommand include
-filename "lame_elasticity.tex"
+filename "3.Results.lyx"
 
 \end_inset
 
 
 \end_layout
 
-\begin_layout Section
-Elastostatics - results
-\end_layout
-
-\begin_layout Subsection
-Material parameters
-\end_layout
-
-\begin_layout BeginFrame
-Electroactive polymer structure
-\end_layout
-
 \begin_layout Standard
-A simple electroactive polymer structure was simulated as a proof of concept
- example.
- The structure has fixed displacements at left end and fixed electric potential
- at top and bottom boundaries.
- Calculations are done in dimensionless units.
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
+\begin_inset Note Note
 status open
 
 \begin_layout Plain Layout
-
-
-\backslash
-begin{center}     
-\backslash
-begin{tabular}{ | l | l | l | p{5cm} |}     
-\backslash
-hline     
-\end_layout
-
-\begin_layout Plain Layout
-
-material & $ e_r $ & $ E_{elas} $ & $ 
-\backslash
-nu $ 
-\backslash
-
-\backslash
- 
-\backslash
-hline
-\end_layout
-
-\begin_layout Plain Layout
-
- mat1 & 11.8 & 800 & 0.49 
-\backslash
-
-\backslash
- 
-\backslash
-hline
-\end_layout
-
-\begin_layout Plain Layout
-
-mat2 & 5.8 & 40 & 0.49 
-\backslash
-
-\backslash
- 
-\backslash
-hline
-\end_layout
-
-\begin_layout Plain Layout
-
-
-\backslash
-end{tabular} 
-\backslash
-end{center} 
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-
-
-\backslash
-includegraphics[height=4cm]{images/undeformedMesh.pdf}%
+Ball, Electrostriction, (stick)
 \end_layout
 
 \end_inset
 
-
-\end_layout
-
-\begin_layout Subsection
-Results - composite structure
-\end_layout
-
-\begin_layout BeginFrame
-Electroactive polymer structure
-\end_layout
-
-\begin_layout Standard
-Results (electric potential defines the induced stress and hence the induced
- body forces)
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-begin{align}
-\end_layout
-
-\begin_layout Plain Layout
-
-
-\backslash
-includegraphics[height=3cm]{images/T11.pdf}&
-\end_layout
-
-\begin_layout Plain Layout
-
-
-\backslash
-includegraphics[height=3cm]{images/T12.pdf} 
-\backslash
-
-\backslash
-
-\end_layout
-
-\begin_layout Plain Layout
-
-
-\backslash
-includegraphics[height=3cm]{images/T22.pdf}&
-\end_layout
-
-\begin_layout Plain Layout
-
-
-\backslash
-includegraphics[height=3cm]{images/phi.pdf}
-\end_layout
-
-\begin_layout Plain Layout
-
-
-\backslash
-end{align}
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout EndFrame
-
-\end_layout
-
-\begin_layout BeginFrame
-Electroactive polymer structure
-\end_layout
-
-\begin_layout Standard
-Results (electric potential defines the induced stress and hence the induced
- body forces)
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-begin{align}
-\end_layout
-
-\begin_layout Plain Layout
-
-
-\backslash
-includegraphics[height=3cm]{images/eps11_3.pdf}&
-\end_layout
-
-\begin_layout Plain Layout
-
-
-\backslash
-includegraphics[height=3cm]{images/eps12_3.pdf} 
-\backslash
-
-\backslash
-
-\end_layout
-
-\begin_layout Plain Layout
-
-
-\backslash
-includegraphics[height=3cm]{images/eps22_3.pdf}&
-\end_layout
-
-\begin_layout Plain Layout
-
-
-\backslash
-includegraphics[height=3cm]{images/uv_3.pdf}
-\end_layout
-
-\begin_layout Plain Layout
-
-
-\backslash
-end{align}
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout EndFrame
-
-\end_layout
-
-\begin_layout Subsection
-Results - homogeneous structure
-\end_layout
-
-\begin_layout BeginFrame
-Electroactive polymer structure
-\end_layout
-
-\begin_layout Standard
-Homogeneous structure - fixed base
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-begin{align}
-\end_layout
-
-\begin_layout Plain Layout
-
-
-\backslash
-includegraphics[height=3cm]{images/eps11.pdf}&
-\end_layout
-
-\begin_layout Plain Layout
-
-
-\backslash
-includegraphics[height=3cm]{images/eps12.pdf}
-\end_layout
-
-\begin_layout Plain Layout
-
-
-\backslash
-end{align}
-\end_layout
-
-\begin_layout Plain Layout
-
-
-\backslash
-includegraphics[height=3cm]{images/eps22.pdf}
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout EndFrame
-
-\end_layout
-
-\begin_layout BeginFrame
-Electroactive polymer structure
-\end_layout
-
-\begin_layout Standard
-Homogeneous structure - fixed base and top
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-begin{align}
-\end_layout
-
-\begin_layout Plain Layout
-
-
-\backslash
-includegraphics[height=3cm]{images/eps11_2.pdf}&
-\end_layout
-
-\begin_layout Plain Layout
-
-
-\backslash
-includegraphics[height=3cm]{images/eps12_2.pdf}
-\end_layout
-
-\begin_layout Plain Layout
-
-
-\backslash
-end{align}
-\end_layout
-
-\begin_layout Plain Layout
-
-
-\backslash
-includegraphics[height=3cm]{images/eps22_2.pdf}
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout EndFrame
 
 \end_layout
 
