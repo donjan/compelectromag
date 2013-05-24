@@ -54,10 +54,10 @@ epsilon3 = 1.0*e0 * [ 1, 0, 0,           // ball = isolator
 real[int] ballpos(2);
 ballpos = [1., 4.];
 real ballr = 0.5;
-int ballh = 60;
-int frameh = 90;
-//~ int ballh = 20;
-//~ int frameh = 40;
+//~ int ballh = 60;
+//~ int frameh = 90;
+int ballh = 20;
+int frameh = 40;
 //~ int ballh = 15;
 //~ int frameh = 20;
 
@@ -147,18 +147,19 @@ for(real tau=0; tau < tend; tau+=dt) {
   fespace Vh(Allh,P3);
   Vh phi, w;
 
-  if(timedist(tau, 0.18*tend, dt)) {
+  if(timedist(tau, 0.12*tend, dt)) {
     Label1 = Lboxright;
     Label2 = Lboxleft;
   }
-  if(timedist(tau, 0.6*tend, dt)) {
+  if(timedist(tau, 0.5*tend, dt)) {
     swap(phiClo, phiChi, real, tmp);
   }
 
 
   // Solve the problem
 
-  problem PoissonVarf(phi,w,solver=CG) = int2d(Allh)(
+//~   problem PoissonVarf(phi,w,solver=CG) = int2d(Allh)(
+  problem PoissonVarf(phi,w) = int2d(Allh)(
       EPS[0][0] * dx(phi)*dx(w)
     + EPS[0][1] * dx(phi)*dy(w)
     + EPS[1][0] * dy(phi)*dx(w)
@@ -210,7 +211,7 @@ for(real tau=0; tau < tend; tau+=dt) {
 
 //~   plot2d(Allh, "mesh");
 //~   Ph eps00 = EPS[0][0]; plot3d(eps00, "eps00");
-//~   plot2d(phi, "phi");
+  plot2d(phi, "phi");
 //~   plot2d([D[0], D[1]], "D field");
 //~   plot2d(T[0], "T11");
 //~   plot2d(T[1], "T12");
@@ -243,11 +244,11 @@ for(real tau=0; tau < tend; tau+=dt) {
 //~   plotenv(edyT12, dy(T[1]), "dy(T12)");
 //~   plotenv2(efx, efy, fx, fy, "t=" + tau + ", force field, Fx: " + Fx + ", Fy: " + Fy);
 
-Vh fx2 = dx(T[0])+dy(T[3]);                          // should be ~0
-Vh fy2 = dx(T[1])+dy(T[4]);
-Vh fxd = fx-fx2;
-Vh fyd = fy-fy2;
-plotenv(efxd, fxd, "difference in fx, high resolution");
+//~ Vh fx2 = dx(T[0])+dy(T[3]);                          // should be ~0
+//~ Vh fy2 = dx(T[1])+dy(T[4]);
+//~ Vh fxd = fx-fx2;
+//~ Vh fyd = fy-fy2;
+//~ plotenv(efxd, fxd, "difference in fx, high resolution");
 
 //~   of << tau << "  " << Fx << "  " << Fy << endl;
 ////////////////////////////////////////////////////////////////////////////////
