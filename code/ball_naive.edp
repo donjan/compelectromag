@@ -145,7 +145,7 @@ for(real tau=0; tau < tend; tau+=dt) {
   fespace Vh(Allh,P3);
   Vh phi, w;
 
-  if(timedist(tau, 0.2*tend, dt)) {
+  if(timedist(tau, 0.18*tend, dt)) {
     Label1 = Lboxright;
     Label2 = Lboxleft;
   }

@@ -141,7 +141,7 @@ status open
 
 \end_inset
 
-Oil and fuel puriffication 
+Oil and fuel purification 
 \begin_inset VSpace medskip
 \end_inset
 
@@ -373,6 +373,37 @@ delta_{ij}(E_kD_k)
 \backslash
 end{equation}
 \end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout BeginFrame
+The Maxwell Stress Tensor
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+\sigma_{ij} & = & -E_{i}D_{j}+\frac{1}{2}\delta_{ij}E_{k}D_{k}\\
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+\align center
+\begin_inset Graphics
+	filename images/strensor.gif
+	scale 30
 
 \end_inset
 

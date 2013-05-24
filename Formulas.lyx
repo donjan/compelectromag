@@ -276,5 +276,23 @@ Force 2-dim
 
 \end_layout
 
+\begin_layout Standard
+sage:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $f_{x}=−\varepsilon_{xx}\phi_{x}\phi_{xx}+\frac{1}{2}(\varepsilon_{yx}\text{−}\varepsilon_{xy})(\phi_{x}\phi_{xy}+\phi_{xx}\phi_{y})+\varepsilon_{yy}\phi_{xy}\phi_{y}\quad\text{−}\varepsilon_{xx}\phi_{x}\phi_{yy}\text{−}\varepsilon_{xx}\phi_{xy}\phi_{y}\text{−}2\varepsilon_{xy}\phi_{y}\phi_{yy}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $f_{y}=\text{−}2\varepsilon_{yx}\phi_{x}\phi_{xx}\text{−}\varepsilon_{yy}\phi_{x}\phi_{xy}\text{−}\varepsilon_{yy}\phi_{xx}\phi_{y}\quad+\varepsilon_{xx}\phi_{x}\phi_{xy}+\frac{1}{2}(\varepsilon_{xy}\text{−}\varepsilon_{yx})(\phi_{x}\phi_{yy}+\phi_{xy}\phi_{y})\text{−}\varepsilon_{yy}\phi_{y}\phi_{yy}$
+\end_inset
+
+
+\end_layout
+
 \end_body
 \end_document

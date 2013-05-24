@@ -54,12 +54,12 @@ epsilon3 = 1.0*e0 * [ 1, 0, 0,           // ball = isolator
 real[int] ballpos(2);
 ballpos = [1., 4.];
 real ballr = 0.5;
-//~ int ballh = 60;
-//~ int frameh = 90;
+int ballh = 60;
+int frameh = 90;
 //~ int ballh = 20;
 //~ int frameh = 40;
-int ballh = 15;
-int frameh = 20;
+//~ int ballh = 15;
+//~ int frameh = 20;
 
 real[int] ballposold = ballpos;
 
@@ -103,7 +103,8 @@ macro bordersNonball(n) Bod(n) + Bor(n) + Bou(n) + Bol(n)
 
 border B(t=0,2*pi) {
   x = ballpos[0]+ballr*cos(t);
-  y = ballpos[1]+0.5*ballr*sin(t);
+//~   y = ballpos[1]+0.5*ballr*sin(t);
+  y = ballpos[1]+ballr*sin(t);
   label = Lball;
 }
 
@@ -146,7 +147,7 @@ for(real tau=0; tau < tend; tau+=dt) {
   fespace Vh(Allh,P3);
   Vh phi, w;
 
-  if(timedist(tau, 0.2*tend, dt)) {
+  if(timedist(tau, 0.18*tend, dt)) {
     Label1 = Lboxright;
     Label2 = Lboxleft;
   }
@@ -183,22 +184,16 @@ for(real tau=0; tau < tend; tau+=dt) {
 
 
   // Calculate the forces and apply collapsed Velocity Verlet on ball position
-  // TODO: derivation in formulas.lyx
 
+  Vh fx = - EPS[0][0]*dxx(phi)*dx(phi) - EPS[1][1]*dyx(phi)*dy(phi)
+                + 1/2*(EPS[1][0] - EPS[0][1]) * ( dx(phi)*dyx(phi) + dxx(phi)*dy(phi) )        // dx(T[0])
+          - EPS[0][0]*(dyy(phi)*dx(phi)+dy(phi)*dyx(phi)) - EPS[0][1]*(2*dyy(phi)*dy(phi));    // dy(T[3])
+  Vh fy = - EPS[1][0]*(dxx(phi)*dx(phi)*2) - EPS[1][1]*(dxx(phi)*dy(phi)+dx(phi)*dxy(phi))     // dx(T[1])
+          + EPS[0][0]*dx(phi)*dyx(phi) - EPS[1][1]*dy(phi)*dyy(phi)
+                + 1/2*(EPS[0][1] - EPS[1][0]) * ( dx(phi)*dyy(phi) + dyx(phi)*dy(phi) );       // dy(T[4])
 
-
-  //~ Vh fx = dx(T[0]) - EPS[1][0]*(dyy(phi)*E[0]+E[1]*dyx(phi)) - EPS[1][1]*(2*dyy(phi)*E[1]);
-  //~ Vh fy = - EPS[0][0]*(2*dxx(phi)*E[0]) - EPS[0][1]*(dxx(phi)*E[1]+E[0]*dxy(phi)) + dy(T[4]);
-
-  Vh fx = dx(T[0]) - EPS[0][0]*(dyy(phi)*dx(phi)+dy(phi)*dyx(phi)) - EPS[0][1]*(2*dyy(phi)*dy(phi));
-  Vh fy = - EPS[1][0]*(dxx(phi)*dx(phi)*2) - EPS[1][1]*(dxx(phi)*dy(phi)+dx(phi)*dxy(phi)) + dy(T[4]);
   fx = -fx;
   fy = -fy;
-
-  //~ real Fx = int1d(Ballh, Lball) (fx*N.x);
-  //~ real Fy = int1d(Ballh, Lball) (fy*N.y);
-  real Fx = int2d(Ballh) (fx);  // same as above
-  real Fy = int2d(Ballh) (fy);
 
 //~   real Fx = int1d(Ballh, Lball) (fx*N.x);
 //~   real Fy = int1d(Ballh, Lball) (fy*N.y);
@@ -246,8 +241,14 @@ for(real tau=0; tau < tend; tau+=dt) {
 //~   plotenv(eT12, T[1], "T12 == T21");
 //~   plotenv(edxT12, dx(T[1]), "dx(T12)");
 //~   plotenv(edyT12, dy(T[1]), "dy(T12)");
-
 //~   plotenv2(efx, efy, fx, fy, "t=" + tau + ", force field, Fx: " + Fx + ", Fy: " + Fy);
+
+Vh fx2 = dx(T[0])+dy(T[3]);                          // should be ~0
+Vh fy2 = dx(T[1])+dy(T[4]);
+Vh fxd = fx-fx2;
+Vh fyd = fy-fy2;
+plotenv(efxd, fxd, "difference in fx, high resolution");
+
 //~   of << tau << "  " << Fx << "  " << Fy << endl;
 ////////////////////////////////////////////////////////////////////////////////
 
