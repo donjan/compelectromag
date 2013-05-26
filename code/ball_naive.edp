@@ -61,6 +61,7 @@ int ballh = 15;
 int frameh = 20;
 
 real[int] ballposold = ballpos;
+real ballposabs = 0;
 
 
 // Simulation parameters
@@ -113,7 +114,11 @@ border B(t=0,2*pi) {
 ////////////////////////////////////////////////////////////////////////////////
 
 //~ ofstream of("forces");
-for(real tau=0; tau < tend; tau+=dt) {
+ofstream of("ballmovement");
+//~ for(real tau=0; tau < tend; tau+=dt) {
+for(real tau=0; tau < 1.8; tau+=dt) {
+
+  cout << "t=" << tau << endl;
 
   // Build meshes
 
@@ -145,11 +150,11 @@ for(real tau=0; tau < tend; tau+=dt) {
   fespace Vh(Allh,P3);
   Vh phi, w;
 
-  if(timedist(tau, 0.16*tend, dt)) {
+  if(timedist(tau, 0.12*tend, dt)) {
     Label1 = Lboxright;
     Label2 = Lboxleft;
   }
-  if(timedist(tau, 0.6*tend, dt)) {
+  if(timedist(tau, 0.4*tend, dt)) {
     swap(phiClo, phiChi, real, tmp);
   }
 
@@ -213,6 +218,9 @@ for(real tau=0; tau < tend; tau+=dt) {
 //~   fy = fy*( (reg!=reg(ballpos[0],ballpos[1]))*0 + (reg==reg(ballpos[0],ballpos[1]))*1 );
 //~   plot2d([fx, fy], "force field, Fx: " + Fx + ", Fy: " + Fy);
 
+  ballposabs += abs(ballpos[0]-ballposold[0])  + abs(ballpos[1]-ballposold[1]);
+  real ballvabs = sqrt(ballv[0]^2 + ballv[1]^2);
+  of << tau << "  " << ballposabs << "  " << ballvabs << endl;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Plotting environment

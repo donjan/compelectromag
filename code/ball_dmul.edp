@@ -119,6 +119,8 @@ border B(t=0,2*pi) {
 //~ ofstream of("ballmovement");
 for(real tau=0; tau < tend; tau+=dt) {
 
+  cout << "t=" << tau << endl;
+
   // Build meshes
 
   mesh Ballh = buildmesh( B(ballh) );
