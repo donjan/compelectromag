@@ -101,7 +101,7 @@
 \begin_body
 
 \begin_layout Section
-Elastostatics - results
+Results (Elastostatics)
 \end_layout
 
 \begin_layout Subsection
@@ -572,6 +572,47 @@ includegraphics[height=3cm]{images/eps22_2.pdf}
 \end_inset
 
 
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Subsection
+Conclusion
+\end_layout
+
+\begin_layout BeginFrame
+Discussion
+\end_layout
+
+\begin_layout Itemize
+Applied knowledge from lecture
+\end_layout
+
+\begin_layout Itemize
+Interesting phenomena
+\end_layout
+
+\begin_layout Itemize
+Working with the FreeFem++ codebase
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Questions?
+\end_layout
+
+\begin_layout Standard
+\noindent
+\align center
+
+\series bold
+\size larger
+Questions?
 \end_layout
 
 \begin_layout EndFrame
