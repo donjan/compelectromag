@@ -63,11 +63,16 @@ for(int i=0;i<maxmn;i++){
  * finite element calculations.
  */
 fespace VhAvg(Th[0],P2); // P2 conforming triangular FEM
-fespace Vh2Avg(Th[0],[P1,P1]);
+//~ fespace Vh2Avg(Th[0],[P1,P1]);
+fespace Vh2Avg(Th[0],[P2,P2]);
 VhAvg phiAvg;
 Vh2Avg [uAvg,vAvg];
 VhAvg phi,w ,prec, unused;
 VhAvg epsAvg11,epsAvg12,epsAvg22;
+ifstream foptin("optimal.mesh");
+VhAvg epsAvg11opt;
+foptin >> epsAvg11opt[];
+
 
 for(int mn = 1; mn<maxmn;mn++){
 
@@ -118,7 +123,8 @@ for(int mn = 1; mn<maxmn;mn++){
 	Ph e32 = ((reg==regInternal) ? epsilon1[7]:epsilon2[7]);
 	Ph e33 = ((reg==regInternal) ? epsilon1[8]:epsilon2[8]);
 
-	fespace Vh2(Th[mn],[P1,P1]);
+//~ 	fespace Vh2(Th[mn],[P1,P1]);
+	fespace Vh2(Th[mn],[P2,P2]);
 	Vh2 [u,v],[uu,vv];
 
 	real sqrt2=sqrt(2.);
@@ -196,6 +202,9 @@ for(int mn = 1; mn<maxmn;mn++){
 
 		
 		epsAvg11 = epsAvg11 + epss11;
+		VhAvg eps11resid;
+		eps11resid = abs(epss11 - epsAvg11opt);
+		resid = int2d(Vh[0])(eps11resid);
 		epsAvg12 = epsAvg12 + epss12;
 		epsAvg22 = epsAvg22 + epss22;
 		
@@ -205,13 +214,13 @@ for(int mn = 1; mn<maxmn;mn++){
 		//~ plot(epss11,cmm="eps11",ps="eps11_3.eps",fill=true,value=true);
 		//~ plot(epss12,cmm="eps12",ps="eps12_3.eps",fill=true,value=true);
 		//~ plot(epss22,cmm="eps22",ps="eps22_3.eps",fill=true,value=true);
-		plot([u,v],cmm="displacement",fill=true,value=true);
+//~ 		plot([u,v],cmm="displacement",fill=true,value=true);
 		
 		
 		Th[mn] = movemesh(Th[mn], [x+(u)*coef, y+(v)*coef]);
 		//system(" for i in $(ls *.eps); do  epstopdf $i; done");
 		//system("rm *.eps");
-		plot(epss11,wait=true,fill=true,value=true);
+//~ 		plot(epss11,wait=true,fill=true,value=true);
 		//plot(eps11Avg,wait=true,fill=true,value=true);
 		qual << int2d(Th[mn])(epss12) <<endl;
 
@@ -220,4 +229,6 @@ for(int mn = 1; mn<maxmn;mn++){
 plot(epsAvg11,wait=true,fill=true,value=true);
 plot(epsAvg12,wait=true,fill=true,value=true);
 plot(epsAvg22,wait=true,fill=true,value=true);
-qual<<int2d(Th[0])(epsAvg12/mn) <<endl;
+qual<<int2d(Th[0])(epsAvg12) <<endl;
+ofstream fopt("optimal.mesh");
+fopt << epsAvg11[];
