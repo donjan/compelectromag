@@ -41,6 +41,7 @@ madapt2[2] = 30+deltaDisc;
 madapt2[3] = 20+deltaDisc;
 int maxmn = 10;
 mesh[int] Th(maxmn);
+ofstream qual("quality.txt");
 
 for(int i=0;i<maxmn;i++){
 	Th[i] = buildmesh(b01(madapt[0]) + b12(madapt[1]) + b23(madapt[2]) + b30(madapt[3]) +  
@@ -193,6 +194,7 @@ for(int mn = 1; mn<maxmn;mn++){
 		epss12 = 0.5*(dy(u)+dx(v));
 		epss22 = dy(v);
 
+		
 		epsAvg11 = epsAvg11 + epss11;
 		epsAvg12 = epsAvg12 + epss12;
 		epsAvg22 = epsAvg22 + epss22;
@@ -211,9 +213,11 @@ for(int mn = 1; mn<maxmn;mn++){
 		//system("rm *.eps");
 		plot(epss11,wait=true,fill=true,value=true);
 		//plot(eps11Avg,wait=true,fill=true,value=true);
+		qual << int2d(Th[mn])(epss12) <<endl;
 
 	}
 }
 plot(epsAvg11,wait=true,fill=true,value=true);
 plot(epsAvg12,wait=true,fill=true,value=true);
 plot(epsAvg22,wait=true,fill=true,value=true);
+qual<<int2d(Th[0])(epsAvg12/mn) <<endl;
