@@ -652,7 +652,7 @@ Heuristic error estimation strategy:
 \end_layout
 
 \begin_layout Standard
-antisymmetric derived quatities (shear stress - eps12) should integrate
+antisymmetric derived quantities (shear stress - eps12) should integrate
  to zero.
  Also higher refinement should be closer to reality.
  To test the quality of the averaged solution we plot the integral of (eps12aver

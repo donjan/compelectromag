@@ -860,12 +860,12 @@ macro epsilon(u1,u2) [dx(u1),dy(u2),(dy(u1)+dx(u2))/sqrt2] // EOM
 
 \begin_layout Plain Layout
 
-Vh f1 = dx(T11)+dy(T21);
+Vh f1 = /* derivation */
 \end_layout
 
 \begin_layout Plain Layout
 
-Vh f2 = dx(T21)+dy(T22);
+Vh f2 = /* derivation */
 \end_layout
 
 \begin_layout Plain Layout
