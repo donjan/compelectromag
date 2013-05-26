@@ -460,6 +460,192 @@ end{frame}
 
 \end_layout
 
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Subsection
+Force calculation
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{frame}[fragile] 
+\backslash
+frametitle{Element forces}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $f=\nabla\sigma$
+\end_inset
+
+ 
+\begin_inset space \qquad{}
+\end_inset
+
+ 
+\begin_inset Formula $\Rightarrow$
+\end_inset
+
+ 
+\begin_inset space \qquad{}
+\end_inset
+
+ in 2 dim 
+\begin_inset Formula $f=\left(\begin{array}{c}
+\partial_{x}\sigma_{11}+\partial_{y}\sigma_{21}\\
+\partial_{x}\sigma_{12}+\partial_{y}\sigma_{22}
+\end{array}\right)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+Vh fx = dx(T[0][0])+dy(T[1][0])
+\end_layout
+
+\begin_layout Plain Layout
+
+Vh fy = dx(T[0][1])+dy(T[1][1])
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Erratic, inconsistent behaviour (Third order elements, various solvers)!
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{frame}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{frame}[fragile] 
+\backslash
+frametitle{Element forces}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+Vh fx = - EPS[0][0]*dxx(phi)*dx(phi) - EPS[1][1]*dyx(phi)*dy(phi)
+\end_layout
+
+\begin_layout Plain Layout
+
+        + 1/2*(EPS[1][0] - EPS[0][1])
+\end_layout
+
+\begin_layout Plain Layout
+
+             *( dx(phi)*dyx(phi) + dxx(phi)*dy(phi) )
+\end_layout
+
+\begin_layout Plain Layout
+
+        - EPS[0][0]*(dyy(phi)*dx(phi)+dy(phi)*dyx(phi))
+\end_layout
+
+\begin_layout Plain Layout
+
+        - EPS[0][1]*(2*dyy(phi)*dy(phi));
+\end_layout
+
+\begin_layout Plain Layout
+
+Vh fy = - EPS[1][0]*(dxx(phi)*dx(phi)*2)
+\end_layout
+
+\begin_layout Plain Layout
+
+        - EPS[1][1]*(dxx(phi)*dy(phi)+dx(phi)*dxy(phi))
+\end_layout
+
+\begin_layout Plain Layout
+
+        + EPS[0][0]*dx(phi)*dyx(phi) - EPS[1][1]*dy(phi)*dyy(phi)
+\end_layout
+
+\begin_layout Plain Layout
+
+        + 1/2*(EPS[0][1] - EPS[1][0])
+\end_layout
+
+\begin_layout Plain Layout
+
+             *( dx(phi)*dyy(phi) + dyx(phi)*dy(phi) );
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{frame}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Subsection
 Elastostatics
 \end_layout
@@ -498,19 +684,10 @@ sigma_{ij} $
 \end_inset
 
  is the stress tensor and 
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-$ e_{ij}=
-\backslash
-frac{1}{2}{u_i,j+u_j,i} $
-\end_layout
-
+\begin_inset Formula $e_{ij}=\frac{1}{2}(u_{i,j}+u_{j,i})$
 \end_inset
 
-is the strain tensor.
+ is the strain tensor.
  Then,
 \end_layout
 
@@ -738,188 +915,6 @@ end{frame}
 \end_layout
 
 \begin_layout EndFrame
-
-\end_layout
-
-\begin_layout Subsection
-Force calculation
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-begin{frame}[fragile] 
-\backslash
-frametitle{Element forces}
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula $f=\nabla\sigma$
-\end_inset
-
- 
-\begin_inset space \qquad{}
-\end_inset
-
- 
-\begin_inset Formula $\Rightarrow$
-\end_inset
-
- 
-\begin_inset space \qquad{}
-\end_inset
-
- in 2 dim 
-\begin_inset Formula $f=\left(\begin{array}{c}
-\partial_{x}\sigma_{11}+\partial_{y}\sigma_{21}\\
-\partial_{x}\sigma_{12}+\partial_{y}\sigma_{22}
-\end{array}\right)$
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset listings
-inline false
-status open
-
-\begin_layout Plain Layout
-
-Vh fx = dx(T[0][0])+dy(T[1][0])
-\end_layout
-
-\begin_layout Plain Layout
-
-Vh fy = dx(T[0][1])+dy(T[1][1])
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-Erratic, inconsistent behaviour (Third order elements, various solvers)!
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-end{frame}
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-begin{frame}[fragile] 
-\backslash
-frametitle{Element forces}
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset listings
-inline false
-status open
-
-\begin_layout Plain Layout
-
-Vh fx = - EPS[0][0]*dxx(phi)*dx(phi) - EPS[1][1]*dyx(phi)*dy(phi)
-\end_layout
-
-\begin_layout Plain Layout
-
-        + 1/2*(EPS[1][0] - EPS[0][1])
-\end_layout
-
-\begin_layout Plain Layout
-
-             *( dx(phi)*dyx(phi) + dxx(phi)*dy(phi) )
-\end_layout
-
-\begin_layout Plain Layout
-
-        - EPS[0][0]*(dyy(phi)*dx(phi)+dy(phi)*dyx(phi))
-\end_layout
-
-\begin_layout Plain Layout
-
-        - EPS[0][1]*(2*dyy(phi)*dy(phi));
-\end_layout
-
-\begin_layout Plain Layout
-
-Vh fy = - EPS[1][0]*(dxx(phi)*dx(phi)*2)
-\end_layout
-
-\begin_layout Plain Layout
-
-        - EPS[1][1]*(dxx(phi)*dy(phi)+dx(phi)*dxy(phi))
-\end_layout
-
-\begin_layout Plain Layout
-
-        + EPS[0][0]*dx(phi)*dyx(phi) - EPS[1][1]*dy(phi)*dyy(phi)
-\end_layout
-
-\begin_layout Plain Layout
-
-        + 1/2*(EPS[0][1] - EPS[1][0])
-\end_layout
-
-\begin_layout Plain Layout
-
-             *( dx(phi)*dyy(phi) + dyx(phi)*dy(phi) );
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-end{frame}
-\end_layout
-
-\end_inset
-
 
 \end_layout
 
