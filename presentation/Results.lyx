@@ -702,7 +702,7 @@ Averaging by taking into account an element shape factor
 
 \end_deeper
 \begin_layout BeginFrame
-Electrostatic - elastostatic coupling out look
+Electrostatic - elastostatic coupling outlook
 \end_layout
 
 \begin_layout Itemize
@@ -717,7 +717,7 @@ Non-linear elasticity should be implemented
 
 \end_deeper
 \begin_layout Itemize
-High electric field values are applied for the effects to be usefull
+High electric field values are applied for the effects to be useful
 \end_layout
 
 \begin_deeper
@@ -765,11 +765,15 @@ Selected References
 \end_layout
 
 \begin_layout Itemize
+
+\size tiny
 Electroactive polymer simulation and maxwell stress tensor:
 \end_layout
 
 \begin_deeper
 \begin_layout Itemize
+
+\size tiny
 Guggi Kofod, Peter Sommer-Larsen, Silicone dielectric elastomer actuators:
  
 \begin_inset Quotes eld
@@ -784,6 +788,8 @@ Finite-elasticity model of actuation
 \end_layout
 
 \begin_layout Itemize
+
+\size tiny
 Bar-Cohen Y., “Electroactive Polymer (EAP) Actuators as Artificial Muscles
  - Reality, Potential and Challenges
 \begin_inset Quotes erd
@@ -795,6 +801,8 @@ Bar-Cohen Y., “Electroactive Polymer (EAP) Actuators as Artificial Muscles
 \end_layout
 
 \begin_layout Itemize
+
+\size tiny
 Rinaldi, Carlos and Brenner, Howard, Phys.
  Rev.
  E: 
@@ -811,17 +819,23 @@ Body versus surface forces in continuum mechanics: Is the Maxwell stress
 
 \end_deeper
 \begin_layout Itemize
+
+\size tiny
 Droplet example:
 \end_layout
 
 \begin_deeper
 \begin_layout Itemize
+
+\size tiny
 P.
  Atten, Electrocoalescence of water droplets in an insulating liquid, J.
  Electrostatics 30 (1993) 259–270.
 \end_layout
 
 \begin_layout Itemize
+
+\size tiny
 M.
  Chiesa, J.A.
  Melheim, A.
