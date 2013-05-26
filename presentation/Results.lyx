@@ -720,14 +720,12 @@ Non-linear elasticity should be implemented
 High electric field values are applied for the effects to be useful
 \end_layout
 
-\begin_deeper
 \begin_layout Itemize
-Non-linear electrostatics
+Polymers are non-linear in general (not good approximation)
 \end_layout
 
-\end_deeper
 \begin_layout Itemize
-When both systems are non linear a non-linear solution strategy should be
+When some systems are non linear a non-linear solution strategy should be
  implemented for the coupled problem
 \end_layout
 
