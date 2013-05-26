@@ -592,10 +592,26 @@ Applied knowledge from lecture
 
 \begin_layout Itemize
 Interesting phenomena
+\begin_inset Newline newline
+\end_inset
+
+Electrostriction
+\begin_inset Newline newline
+\end_inset
+
+Nonlinear regime (Newton-Raphson)
 \end_layout
 
 \begin_layout Itemize
 Working with the FreeFem++ codebase
+\end_layout
+
+\begin_layout BeginFrame
+References
+\end_layout
+
+\begin_layout Itemize
+
 \end_layout
 
 \begin_layout EndFrame
