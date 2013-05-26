@@ -167,11 +167,7 @@ status open
 
 \end_inset
 
-Anisotropic Electrostatics
-\begin_inset VSpace medskip
-\end_inset
-
-
+Electrostatic (Maxwell) stress coupled with elasticity
 \end_layout
 
 \begin_layout Itemize
@@ -185,7 +181,7 @@ status open
 
 \end_inset
 
-Electrostatic (Maxwell) stress coupled with elasticity
+Electrostatic forces moving a ball
 \end_layout
 
 \begin_layout Itemize
@@ -199,7 +195,8 @@ status open
 
 \end_inset
 
-Electrostatic forces moving a ball
+Gaining experience using open source Finite Element software for electromagnetic
+s
 \end_layout
 
 \begin_layout Itemize
@@ -213,8 +210,7 @@ status open
 
 \end_inset
 
-Gaining experience using open source Finite Element software for electromagnetic
-s
+Anisotropic Electrostatics
 \end_layout
 
 \begin_layout EndFrame
@@ -391,10 +387,6 @@ The Maxwell Stress Tensor
 
 \end_inset
 
-
-\end_layout
-
-\begin_layout Standard
 
 \end_layout
 
