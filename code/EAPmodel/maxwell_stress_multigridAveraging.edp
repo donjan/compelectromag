@@ -42,10 +42,10 @@ madapt2[3] = 20+deltaDisc;
 int maxmn = 10;
 mesh[int] Th(maxmn);
 ofstream qual("quality.txt");
-
+ofstream bestSol("bestSol.solution");
 for(int i=0;i<maxmn;i++){
 	Th[i] = buildmesh(b01(madapt[0]) + b12(madapt[1]) + b23(madapt[2]) + b30(madapt[3]) +  
-				bc01(madapt2[0]+i) + bc12(madapt2[1]+i) + bc23(madapt2[2]+i) + bc30(madapt2[3]+i));
+				bc01(madapt2[0]+i*3) + bc12(madapt2[1]+i*3) + bc23(madapt2[2]+i*3) + bc30(madapt2[3]+i*3));
 }
 /*
  * Should define the averaging weights
@@ -220,4 +220,7 @@ for(int mn = 1; mn<maxmn;mn++){
 plot(epsAvg11,wait=true,fill=true,value=true);
 plot(epsAvg12,wait=true,fill=true,value=true);
 plot(epsAvg22,wait=true,fill=true,value=true);
-qual<<int2d(Th[0])(epsAvg12/mn) <<endl;
+qual<<int2d(Th[0])(epsAvg12) <<endl;
+for(i=0;i<Vh2Avg.ndof;i++){
+	bestSol<<epsAvg12<<endl;
+}

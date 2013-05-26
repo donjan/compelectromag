@@ -578,6 +578,19 @@ includegraphics[height=3cm]{images/eps22_2.pdf}
 
 \end_layout
 
+\begin_layout BeginFrame
+Multiple Mesh Averaging
+\end_layout
+
+\begin_layout Standard
+Maxwell stress results are not satisfyingly accurate by visual inspection.
+ We calculate a quantity of interest (par example elastic strain) that we
+ believe to be inaccurate on different meshes and then average over the
+ different meshes.
+ We believe that simply having different meshes would result in inaccuracy
+ at different mesh points and averaging over
+\end_layout
+
 \begin_layout Subsection
 Conclusion
 \end_layout
@@ -611,6 +624,14 @@ References
 \end_layout
 
 \begin_layout Itemize
+\begin_inset Quotes eld
+\end_inset
+
+Body versus surface forces in continuum mechanics: Is the Maxwell stress
+ tensor a physically objective Cauchy stress?
+\begin_inset Quotes erd
+\end_inset
+
 
 \end_layout
 
