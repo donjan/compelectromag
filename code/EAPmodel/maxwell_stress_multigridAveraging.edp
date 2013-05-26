@@ -42,10 +42,10 @@ madapt2[3] = 20+deltaDisc;
 int maxmn = 10;
 mesh[int] Th(maxmn);
 ofstream qual("quality.txt");
-ofstream bestSol("bestSol.solution");
+
 for(int i=0;i<maxmn;i++){
 	Th[i] = buildmesh(b01(madapt[0]) + b12(madapt[1]) + b23(madapt[2]) + b30(madapt[3]) +  
-				bc01(madapt2[0]+i*3) + bc12(madapt2[1]+i*3) + bc23(madapt2[2]+i*3) + bc30(madapt2[3]+i*3));
+				bc01(madapt2[0]+i) + bc12(madapt2[1]+i) + bc23(madapt2[2]+i) + bc30(madapt2[3]+i));
 }
 /*
  * Should define the averaging weights
@@ -63,11 +63,16 @@ for(int i=0;i<maxmn;i++){
  * finite element calculations.
  */
 fespace VhAvg(Th[0],P2); // P2 conforming triangular FEM
-fespace Vh2Avg(Th[0],[P1,P1]);
+//~ fespace Vh2Avg(Th[0],[P1,P1]);
+fespace Vh2Avg(Th[0],[P2,P2]);
 VhAvg phiAvg;
 Vh2Avg [uAvg,vAvg];
 VhAvg phi,w ,prec, unused;
 VhAvg epsAvg11,epsAvg12,epsAvg22;
+ifstream foptin("optimal.mesh");
+VhAvg epsAvg11opt;
+foptin >> epsAvg11opt[];
+ofstream fresid("residuals.txt");
 
 for(int mn = 1; mn<maxmn;mn++){
 
@@ -118,7 +123,8 @@ for(int mn = 1; mn<maxmn;mn++){
 	Ph e32 = ((reg==regInternal) ? epsilon1[7]:epsilon2[7]);
 	Ph e33 = ((reg==regInternal) ? epsilon1[8]:epsilon2[8]);
 
-	fespace Vh2(Th[mn],[P1,P1]);
+//~ 	fespace Vh2(Th[mn],[P1,P1]);
+	fespace Vh2(Th[mn],[P2,P2]);
 	Vh2 [u,v],[uu,vv];
 
 	real sqrt2=sqrt(2.);
@@ -196,31 +202,35 @@ for(int mn = 1; mn<maxmn;mn++){
 
 		
 		epsAvg11 = epsAvg11 + epss11;
+		VhAvg eps11resid;
+		eps11resid = abs(epss11 - epsAvg11opt/mn);
+		real resid = int2d(Th[0])(eps11resid);
+		fresid << resid << endl;
 		epsAvg12 = epsAvg12 + epss12;
 		epsAvg22 = epsAvg22 + epss22;
 		
 		//save maximum displacement of beam:
 		//outFile <<phi[].max<<"/t"<< u[].max << "/t"<<v[].max<<endl;
 		//~ plot(Th,cmm="Deformed mesh",ps="DeformedMesh.eps");
-		//~ plot(epss11,cmm="eps11",ps="eps11_3.eps",fill=true,value=true);
+//~ 		plot(epss11,cmm="eps11",ps="eps11_3.eps",fill=true,value=true);
 		//~ plot(epss12,cmm="eps12",ps="eps12_3.eps",fill=true,value=true);
 		//~ plot(epss22,cmm="eps22",ps="eps22_3.eps",fill=true,value=true);
-		plot([u,v],cmm="displacement",fill=true,value=true);
+//~ 		plot([u,v],cmm="displacement",fill=true,value=true);
 		
 		
 		Th[mn] = movemesh(Th[mn], [x+(u)*coef, y+(v)*coef]);
 		//system(" for i in $(ls *.eps); do  epstopdf $i; done");
 		//system("rm *.eps");
-		plot(epss11,wait=true,fill=true,value=true);
+//~ 		plot(epss11,wait=true,fill=true,value=true);
 		//plot(eps11Avg,wait=true,fill=true,value=true);
 		qual << int2d(Th[mn])(epss12) <<endl;
 
 	}
 }
 plot(epsAvg11,wait=true,fill=true,value=true);
+//~ plot(epsAvg11,wait=true,fill=true,value=true, ps="eps11_avg.eps");
 plot(epsAvg12,wait=true,fill=true,value=true);
 plot(epsAvg22,wait=true,fill=true,value=true);
 qual<<int2d(Th[0])(epsAvg12) <<endl;
-for(i=0;i<Vh2Avg.ndof;i++){
-	bestSol<<epsAvg12<<endl;
-}
+ofstream fopt("optimal.mesh");
+fopt << epsAvg11[];

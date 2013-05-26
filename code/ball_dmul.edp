@@ -178,14 +178,6 @@ for(real tau=0; tau < tend; tau+=dt) {
   // Calculate the stress tensor
 
   func E = [ -dx(phi), -dy(phi), 0 ];                 // E field, z=unused
-  Vh[int] D(3);                                       // Anisotropic field
-  mulMv(D, EPS, E);                                   // D(i) = eps(i, :) * E(:)
-
-  Vh[int] T(9);                                       // stress tensor
-  dyad(T, -E, D);
-  T[0] = T[0] + 0.5*dotp(E, D);                       // add to the diag
-  T[4] = T[4] + 0.5*dotp(E, D);
-  T[8] = T[8] + 0.5*dotp(E, D);
 
 
   // Calculate the forces and apply collapsed Velocity Verlet on ball position
