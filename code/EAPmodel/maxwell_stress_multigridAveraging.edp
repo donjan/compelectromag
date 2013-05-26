@@ -1,0 +1,219 @@
+// file membrane.edp
+int makeplots = 0;
+
+//For region definition:
+
+real V0 = 0;
+real deltaV = 100;
+
+real internalStartX = 0.45;
+real internalStartY = 0.5;
+
+real internalLength = 2.1;
+real internalHeight = 0.5;
+
+
+real externalLength = 3;
+real externalHeight = 1.5;
+
+//A rectangular region in a rectangular box
+border b01 (t=0,externalLength) { x=t;y=0;label = 0;}
+border b12 (t=0,externalHeight) { x=externalLength;y=t;label = 1;}
+border b23 (t=externalLength,0) { x=t; y=externalHeight; label = 2;}
+border b30 (t=externalHeight,0) { x=0; y=t; label = 3;}
+
+border bc01 (t=internalStartX,internalStartX+internalLength) { x=t; y=internalStartY; label = 5;}
+border bc12 (t=internalStartY,internalStartY+internalHeight) { x=internalStartX+internalLength; y=t; label = 6;}
+border bc23 (t=internalStartX+internalLength,internalStartX) { x=t;y=internalStartY+internalHeight;label = 7;}
+border bc30 (t=internalStartY+internalHeight,internalStartY) { x=internalStartX;y=t;label = 8;}
+int[int] madapt(4); 
+int[int] madapt2(4);
+int deltaDisc=0;
+
+madapt[0] = 50;
+madapt[1] = 10;
+madapt[2] = 50;
+madapt[3] = 10;
+
+madapt2[0] = 30+deltaDisc;
+madapt2[1] = 20+deltaDisc;
+madapt2[2] = 30+deltaDisc;
+madapt2[3] = 20+deltaDisc;
+int maxmn = 10;
+mesh[int] Th(maxmn);
+
+for(int i=0;i<maxmn;i++){
+	Th[i] = buildmesh(b01(madapt[0]) + b12(madapt[1]) + b23(madapt[2]) + b30(madapt[3]) +  
+				bc01(madapt2[0]+i) + bc12(madapt2[1]+i) + bc23(madapt2[2]+i) + bc30(madapt2[3]+i));
+}
+/*
+ * Should define the averaging weights
+ * according to a perceived discretization error,
+ * and not with a simple mean!...\
+ * 
+ * That would be cool...
+ */
+
+// multigrid finite element method for integration accuracy increase:
+/*
+ * I define the coarsest finite element space outside the loop
+ * in order to facilitate the averaging process.
+ * The coarsest FEspace is reserved for field averaging and not for 
+ * finite element calculations.
+ */
+fespace VhAvg(Th[0],P2); // P2 conforming triangular FEM
+fespace Vh2Avg(Th[0],[P1,P1]);
+VhAvg phiAvg;
+Vh2Avg [uAvg,vAvg];
+VhAvg phi,w ,prec, unused;
+VhAvg epsAvg11,epsAvg12,epsAvg22;
+
+for(int mn = 1; mn<maxmn;mn++){
+
+	fespace Ph(Th[mn],P0);
+	Ph reg = region;
+	int regExternal  = reg(0.01,0.01);//The region belonging to the external box
+	int regInternal  = reg(internalStartX+internalLength/2,internalStartY+internalHeight/2);//The region belonging to the internal box
+
+	fespace Vh(Th[mn],P2); // P2 conforming triangular FEM
+
+	Vh phi,w ,prec, unused;
+	real exponent = 0;
+	real e0 = 8.854187 *1;
+
+	real[int]  epsilon1(9);
+	real[int]  epsilon2(9);
+
+	//Non - Voigt notation
+	real er1 = 11.8;//Amorphous silicon
+	real er2 = 5.8;//Something else
+	epsilon1[0] = er1*e0 ;
+	epsilon1[1] = 0;
+	epsilon1[2] = 0;
+	epsilon1[3] = 0;
+	epsilon1[4] = er1*e0 ;
+	epsilon1[5] = 0;
+	epsilon1[6] = 0;
+	epsilon1[7] = 0;
+	epsilon1[8] = er1 *e0;
+
+	epsilon2[0] = er2  *e0;
+	epsilon2[1] = 0;
+	epsilon2[2] = 0;
+	epsilon2[3] = 0;
+	epsilon2[4] = er2  *e0;
+	epsilon2[5] = 0;
+	epsilon2[6] = 0;
+	epsilon2[7] = 0;
+	epsilon2[8] = er2 *e0;
+
+	Ph e11 = ((reg==regInternal) ? epsilon1[0]:epsilon2[0]);
+	Ph e12 = ((reg==regInternal) ? epsilon1[1]:epsilon2[1]);
+	Ph e13 = ((reg==regInternal) ? epsilon1[2]:epsilon2[2]);
+	Ph e21 = ((reg==regInternal) ? epsilon1[3]:epsilon2[3]);
+	Ph e22 = ((reg==regInternal) ? epsilon1[4]:epsilon2[4]);
+	Ph e23 = ((reg==regInternal) ? epsilon1[5]:epsilon2[5]);
+	Ph e31 = ((reg==regInternal) ? epsilon1[6]:epsilon2[6]);
+	Ph e32 = ((reg==regInternal) ? epsilon1[7]:epsilon2[7]);
+	Ph e33 = ((reg==regInternal) ? epsilon1[8]:epsilon2[8]);
+
+	fespace Vh2(Th[mn],[P1,P1]);
+	Vh2 [u,v],[uu,vv];
+
+	real sqrt2=sqrt(2.);
+	macro epsilon(u1,u2)  [dx(u1),dy(u2),(dy(u1)+dx(u2))/sqrt2] // EOM
+	macro div(u,v) ( dx(u)+dy(v) ) // EOM
+
+	real EE1 = 80e1, nu1 = 0.4, mu1= EE1/(2*(1+nu1)); //Amorphous silicon
+	real lambda1 = EE1*nu1/((1+nu1)*(1-2*nu1));
+	real EE2 = 80e1, nu2 = 0.4, mu2= EE2/(2*(1+nu2)); //Something else
+	real lambda2 = EE2*nu2/((1+nu2)*(1-2*nu2));
+
+	Vh2 [Flamex,Flamey];
+	Vh F;
+
+	real coef = 0.001;
+	real dpeak=0;
+
+	for(int i=0;i<1;i++){
+		dpeak = i*0.1;
+		func dVup = 1+i; /*exp(-1*(x-dpeak)^2)*0.1;*/
+		func dVdown = 0;/*- exp(-1*(x-dpeak)^2)*0.1;*/
+		
+		varf LaplaceLHS(phi,w,solver=GMRES,precon=phi)  =  int2d(Th[mn])(     e11 * dx(phi)*dx(w)
+							+ e12 * dx(phi)*dy(w)	    
+							+ e21 * dy(phi)*dx(w)
+							+ e22 * dy(phi)*dy(w))
+							+ on(0,phi=dVup) + on(2,phi = dVdown);
+		matrix A = LaplaceLHS(Vh,Vh);
+
+		varf LaplaceRHS(phi,w) =  on(0,phi=dVup) + on(2,phi = dVdown);
+
+		
+		F[] = LaplaceRHS(0,Vh);
+		phi[] = A^-1 * F[];
+		
+		cout<<"maximums:***************"<<endl;
+		cout<<phi[].max<<"  "<<u[].max<<","<<v[].max<<endl;
+
+
+		Vh E1 = dx(phi);
+		Vh E2 = dy(phi);
+		Vh E3 = dx(phi)*0;
+
+		Vh D1 = E1 * e11 + E2 * e12 + E3 * e13;
+		Vh D2 = E1 * e21 + E2 * e22 + E3 * e23;
+		Vh D3 = E1 * e31 + E2 * e32 + E3 * e33;
+		Vh T11 = E1 * D1  + 0.5 * (E1*D1 + E2*D2 + E3*D3  );
+		Vh T22 = E2 * D2  + 0.5 * (E1*D1 + E2*D2 + E3*D3  );
+		Vh T33 = E3 * D3  + 0.5 * (E1*D1 + E2*D2 + E3*D3  );
+		Vh T12 = E1 * D2 ;
+		Vh T21 = E2 * D1 ;
+		Vh T13 = E1 * D3 ;
+		Vh T23 = E1 * D3 ;
+
+		Vh f1 = dx(T11)+dy(T21);
+		Vh f2 = dx(T21)+dy(T22);
+		
+		real[int] uPrec;
+		uPrec  = u[];
+		
+		//func real[int] prec(real[int] & uPrec);
+		
+		problem lame([u,v],[uu,vv],solver=GMRES)= int2d(Th[mn])(
+				( reg==regInternal?lambda1:lambda2)*div(u,v)*div(uu,vv)
+				+2.*(reg==regInternal?mu1:mu2)* epsilon(u,v)'*epsilon(uu,vv)  ) 
+				-int2d(Th[mn])(f1*uu) - int2d(Th[mn])(f2*vv)
+				+ on(0,v=0,u=0);
+		lame;
+
+		Vh epss11,epss12,epss22;
+
+		epss11 = dx(u);
+		epss12 = 0.5*(dy(u)+dx(v));
+		epss22 = dy(v);
+
+		epsAvg11 = epsAvg11 + epss11;
+		epsAvg12 = epsAvg12 + epss12;
+		epsAvg22 = epsAvg22 + epss22;
+		
+		//save maximum displacement of beam:
+		//outFile <<phi[].max<<"/t"<< u[].max << "/t"<<v[].max<<endl;
+		//~ plot(Th,cmm="Deformed mesh",ps="DeformedMesh.eps");
+		//~ plot(epss11,cmm="eps11",ps="eps11_3.eps",fill=true,value=true);
+		//~ plot(epss12,cmm="eps12",ps="eps12_3.eps",fill=true,value=true);
+		//~ plot(epss22,cmm="eps22",ps="eps22_3.eps",fill=true,value=true);
+		plot([u,v],cmm="displacement",fill=true,value=true);
+		
+		
+		Th[mn] = movemesh(Th[mn], [x+(u)*coef, y+(v)*coef]);
+		//system(" for i in $(ls *.eps); do  epstopdf $i; done");
+		//system("rm *.eps");
+		plot(epss11,wait=true,fill=true,value=true);
+		//plot(eps11Avg,wait=true,fill=true,value=true);
+
+	}
+}
+plot(epsAvg11,wait=true,fill=true,value=true);
+plot(epsAvg12,wait=true,fill=true,value=true);
+plot(epsAvg22,wait=true,fill=true,value=true);
