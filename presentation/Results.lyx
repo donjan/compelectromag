@@ -302,7 +302,7 @@ end{center}
 
 
 \backslash
-includegraphics[height=4cm]{images/undeformedMesh.pdf}%
+includegraphics[height=4cm]{images/undeformedMesh.jpg}%
 \end_layout
 
 \end_inset
@@ -342,14 +342,14 @@ begin{align}
 
 
 \backslash
-includegraphics[height=3cm]{images/T11.pdf}&
+includegraphics[height=3cm]{images/T11.jpg}&
 \end_layout
 
 \begin_layout Plain Layout
 
 
 \backslash
-includegraphics[height=3cm]{images/T12.pdf} 
+includegraphics[height=3cm]{images/T12.jpg} 
 \backslash
 
 \backslash
@@ -360,14 +360,14 @@ includegraphics[height=3cm]{images/T12.pdf}
 
 
 \backslash
-includegraphics[height=3cm]{images/T22.pdf}&
+includegraphics[height=3cm]{images/T22.jpg}&
 \end_layout
 
 \begin_layout Plain Layout
 
 
 \backslash
-includegraphics[height=3cm]{images/phi.pdf}
+includegraphics[height=3cm]{images/phi.jpg}
 \end_layout
 
 \begin_layout Plain Layout
@@ -410,14 +410,14 @@ begin{align}
 
 
 \backslash
-includegraphics[height=3cm]{images/eps11_3.pdf}&
+includegraphics[height=3cm]{images/eps11_3.jpg}&
 \end_layout
 
 \begin_layout Plain Layout
 
 
 \backslash
-includegraphics[height=3cm]{images/eps12_3.pdf} 
+includegraphics[height=3cm]{images/eps12_3.jpg} 
 \backslash
 
 \backslash
@@ -428,14 +428,14 @@ includegraphics[height=3cm]{images/eps12_3.pdf}
 
 
 \backslash
-includegraphics[height=3cm]{images/eps22_3.pdf}&
+includegraphics[height=3cm]{images/eps22_3.jpg}&
 \end_layout
 
 \begin_layout Plain Layout
 
 
 \backslash
-includegraphics[height=3cm]{images/uv_3.pdf}
+includegraphics[height=3cm]{images/uv_3.jpg}
 \end_layout
 
 \begin_layout Plain Layout
@@ -481,14 +481,14 @@ begin{align}
 
 
 \backslash
-includegraphics[height=3cm]{images/eps11.pdf}&
+includegraphics[height=3cm]{images/eps11.jpg}&
 \end_layout
 
 \begin_layout Plain Layout
 
 
 \backslash
-includegraphics[height=3cm]{images/eps12.pdf}
+includegraphics[height=3cm]{images/eps12.jpg}
 \end_layout
 
 \begin_layout Plain Layout
@@ -502,7 +502,7 @@ end{align}
 
 
 \backslash
-includegraphics[height=3cm]{images/eps22.pdf}
+includegraphics[height=3cm]{images/eps22.jpg}
 \end_layout
 
 \begin_layout Plain Layout
@@ -541,14 +541,14 @@ begin{align}
 
 
 \backslash
-includegraphics[height=3cm]{images/eps11_2.pdf}&
+includegraphics[height=3cm]{images/eps11_2.jpg}&
 \end_layout
 
 \begin_layout Plain Layout
 
 
 \backslash
-includegraphics[height=3cm]{images/eps12_2.pdf}
+includegraphics[height=3cm]{images/eps12_2.jpg}
 \end_layout
 
 \begin_layout Plain Layout
@@ -562,7 +562,7 @@ end{align}
 
 
 \backslash
-includegraphics[height=3cm]{images/eps22_2.pdf}
+includegraphics[height=3cm]{images/eps22_2.jpg}
 \end_layout
 
 \begin_layout Plain Layout
@@ -579,16 +579,161 @@ includegraphics[height=3cm]{images/eps22_2.pdf}
 \end_layout
 
 \begin_layout BeginFrame
+Electroactive polymer structure
+\end_layout
+
+\begin_layout Itemize
+The strain calculation seems to be quite inaccurate, especially for the
+ inhomogeneous structure.
+ (Authors advise against maxwell stress calculation with body forces on
+ unstructured meshes)
+\end_layout
+
+\begin_layout Itemize
+That inaccuracy seems to stem from the fact that there is discontinuity
+ on body forces at the same point that there is discontinuity at elastic
+ material parameters! (also the numerical calculation of products of derivatives
+ is quite problematic)
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Our solution - average over the solution on different meshes
+\end_layout
+
+\end_deeper
+\begin_layout BeginFrame
 Multiple Mesh Averaging
 \end_layout
 
 \begin_layout Standard
-Maxwell stress results are not satisfyingly accurate by visual inspection.
- We calculate a quantity of interest (par example elastic strain) that we
- believe to be inaccurate on different meshes and then average over the
- different meshes.
+We calculate a quantity of interest (p.ex.
+ elastic strain) that we believe to be inaccurate on different meshes and
+ then average over the different meshes.
  We believe that simply having different meshes would result in inaccuracy
- at different mesh points and averaging over
+ at different mesh points and averaging over different solutions would improve
+ the final result.
+\end_layout
+
+\begin_layout BeginFrame
+Multiple Mesh Averaging
+\end_layout
+
+\begin_layout Standard
+h-refinement for the inner boundary (averaging over 10 meshes of varying
+ discretization):
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename images/eps11_high.png
+	lyxscale 50
+	width 40page%
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename images/eps11_avg.png
+	lyxscale 50
+	width 40page%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout BeginFrame
+Multiple Mesh Averaging
+\end_layout
+
+\begin_layout Standard
+Heuristic error estimation strategy:
+\end_layout
+
+\begin_layout Standard
+antisymmetric derived quatities (shear stress - eps12) should integrate
+ to zero.
+ Also higher refinement should be closer to reality.
+ To test the quality of the averaged solution we plot the integral of (eps12aver
+aged-eps12currentmesh) to see how that measure behaves.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename images/residual_refinement.png
+	width 70line%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout BeginFrame
+Multiple Mesh Averaging - Outlook
+\end_layout
+
+\begin_layout Standard
+Mesh averaging stategy seems to give more accurate results.
+\end_layout
+
+\begin_layout Itemize
+Possible improvements
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Weighted averaging with respect to expected discretization error
+\end_layout
+
+\begin_layout Itemize
+Different discretizations give more accurate results for different frequencies
+ of the solution - take that into account
+\end_layout
+
+\begin_layout Itemize
+preconditioning for the finer grid solutions by the coarser grid solutions
+\end_layout
+
+\begin_layout Itemize
+Averaging by taking into account an element shape factor
+\end_layout
+
+\end_deeper
+\begin_layout BeginFrame
+Electrostatic - elastostatic coupling out look
+\end_layout
+
+\begin_layout Itemize
+Finite deformation elasticity for real structures is not a good approximation!
+ 
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Non-linear elasticity should be implemented
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+High electric field values are applied for the effects to be usefull
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Non-linear electrostatics
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+When both systems are non linear a non-linear solution strategy should be
+ implemented for the coupled problem
+\end_layout
+
+\begin_layout Itemize
+However under the assumption of small deformations our direct cause and
+ effect approach should be valid.
 \end_layout
 
 \begin_layout Subsection
@@ -609,10 +754,6 @@ Interesting phenomena
 \end_inset
 
 Electrostriction
-\begin_inset Newline newline
-\end_inset
-
-Nonlinear regime (Newton-Raphson)
 \end_layout
 
 \begin_layout Itemize
@@ -620,10 +761,43 @@ Working with the FreeFem++ codebase
 \end_layout
 
 \begin_layout BeginFrame
-References
+Selected References
 \end_layout
 
 \begin_layout Itemize
+Electroactive polymer simulation and maxwell stress tensor:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Guggi Kofod, Peter Sommer-Larsen, Silicone dielectric elastomer actuators:
+ 
+\begin_inset Quotes eld
+\end_inset
+
+Finite-elasticity model of actuation
+\begin_inset Quotes erd
+\end_inset
+
+, Sensors and Actuators A: Physical, Volume 122, Issue 2, 26 August 2005,
+ Pages 273-283, ISSN 0924-4247, 10.1016/j.sna.2005.05.001.
+\end_layout
+
+\begin_layout Itemize
+Bar-Cohen Y., “Electroactive Polymer (EAP) Actuators as Artificial Muscles
+ - Reality, Potential and Challenges
+\begin_inset Quotes erd
+\end_inset
+
+,” 2nd Edition, ISBN 0-8194-5297-1, SPIE Press, Vol.
+ PM136, (March 2004), pp.
+ 1-765
+\end_layout
+
+\begin_layout Itemize
+Rinaldi, Carlos and Brenner, Howard, Phys.
+ Rev.
+ E: 
 \begin_inset Quotes eld
 \end_inset
 
@@ -632,9 +806,34 @@ Body versus surface forces in continuum mechanics: Is the Maxwell stress
 \begin_inset Quotes erd
 \end_inset
 
-
+, 10.1103/PhysRevE.65.036615
 \end_layout
 
+\end_deeper
+\begin_layout Itemize
+Droplet example:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+P.
+ Atten, Electrocoalescence of water droplets in an insulating liquid, J.
+ Electrostatics 30 (1993) 259–270.
+\end_layout
+
+\begin_layout Itemize
+M.
+ Chiesa, J.A.
+ Melheim, A.
+ Pedersen, S.
+ Ingebrigtsen, G.
+ Berg, Forces acting on water droplets falling in oil under the influence
+ of an electric field: numerical predictions versus experimental observations,
+ European Journal of Mechanics - B/Fluids, Volume 24, Issue 6, November–December
+ 2005, Pages 717-732, ISSN 0997-7546, 10.1016/j.euromechflu.2005.03.005.
+\end_layout
+
+\end_deeper
 \begin_layout EndFrame
 
 \end_layout
