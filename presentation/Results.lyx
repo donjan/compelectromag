@@ -689,11 +689,11 @@ Weighted averaging with respect to expected discretization error
 
 \begin_layout Itemize
 Different discretizations give more accurate results for different frequencies
- of the solution - take that into account
+ of the solution (Multigrid)
 \end_layout
 
 \begin_layout Itemize
-preconditioning for the finer grid solutions by the coarser grid solutions
+Preconditioning (reuse coarse solution)
 \end_layout
 
 \begin_layout Itemize
