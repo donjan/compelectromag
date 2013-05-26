@@ -101,7 +101,122 @@
 \begin_body
 
 \begin_layout Section
-Elastostatics - results
+Results (Elastostatics)
+\end_layout
+
+\begin_layout Subsection
+Ball movement
+\end_layout
+
+\begin_layout BeginFrame
+Force on a charged ball
+\end_layout
+
+\begin_layout Standard
+Integrate 
+\begin_inset Formula $\vec{f}=\left(\begin{array}{c}
+f_{x}\\
+f_{y}
+\end{array}\right)$
+\end_inset
+
+ over a charged ball 
+\begin_inset Formula $\oint_{V}\vec{f}d\vec{r}$
+\end_inset
+
+ and apply velocity verlet.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename images/ball_focefield.png
+	lyxscale 40
+	scale 20
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename images/phi_0.1.png
+	lyxscale 40
+	scale 20
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename images/phi_0.7.png
+	lyxscale 40
+	scale 20
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename images/phi_1.6.png
+	lyxscale 40
+	scale 20
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout BeginFrame
+Force on a charged ball
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename images/ballf_bad.png
+	lyxscale 40
+	scale 15
+
+\end_inset
+
+ 
+\begin_inset Graphics
+	filename images/ballf_good.png
+	lyxscale 40
+	scale 15
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename images/dmul_improvement.png
+	lyxscale 40
+	scale 8
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename images/ball_vabs.png
+	lyxscale 40
+	scale 20
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename images/ball_dist.png
+	lyxscale 40
+	scale 20
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
 \end_layout
 
 \begin_layout Subsection
@@ -197,6 +312,10 @@ includegraphics[height=4cm]{images/undeformedMesh.pdf}%
 
 \begin_layout Subsection
 Results - composite structure
+\end_layout
+
+\begin_layout EndFrame
+
 \end_layout
 
 \begin_layout BeginFrame
@@ -453,6 +572,63 @@ includegraphics[height=3cm]{images/eps22_2.pdf}
 \end_inset
 
 
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Subsection
+Conclusion
+\end_layout
+
+\begin_layout BeginFrame
+Discussion
+\end_layout
+
+\begin_layout Itemize
+Applied knowledge from lecture
+\end_layout
+
+\begin_layout Itemize
+Interesting phenomena
+\begin_inset Newline newline
+\end_inset
+
+Electrostriction
+\begin_inset Newline newline
+\end_inset
+
+Nonlinear regime (Newton-Raphson)
+\end_layout
+
+\begin_layout Itemize
+Working with the FreeFem++ codebase
+\end_layout
+
+\begin_layout BeginFrame
+References
+\end_layout
+
+\begin_layout Itemize
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Questions?
+\end_layout
+
+\begin_layout Standard
+\noindent
+\align center
+
+\series bold
+\size larger
+Questions?
 \end_layout
 
 \begin_layout EndFrame

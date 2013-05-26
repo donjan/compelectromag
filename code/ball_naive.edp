@@ -102,7 +102,7 @@ macro bordersNonball(n) Bod(n) + Bor(n) + Bou(n) + Bol(n)
 
 border B(t=0,2*pi) {
   x = ballpos[0]+ballr*cos(t);
-  y = ballpos[1]+0.5*ballr*sin(t);
+  y = ballpos[1]+ballr*sin(t);
   label = Lball;
 }
 
@@ -145,7 +145,7 @@ for(real tau=0; tau < tend; tau+=dt) {
   fespace Vh(Allh,P3);
   Vh phi, w;
 
-  if(timedist(tau, 0.18*tend, dt)) {
+  if(timedist(tau, 0.16*tend, dt)) {
     Label1 = Lboxright;
     Label2 = Lboxleft;
   }
@@ -209,6 +209,8 @@ for(real tau=0; tau < tend; tau+=dt) {
 //~   plot2d(T[1], "T12");
 //~   plot2d(T[3], "T21");
 //~   plot2d(T[4], "T22");
+//~   fx = fx*( (reg!=reg(ballpos[0],ballpos[1]))*0 + (reg==reg(ballpos[0],ballpos[1]))*1 );      // zero out everything except ball forces
+//~   fy = fy*( (reg!=reg(ballpos[0],ballpos[1]))*0 + (reg==reg(ballpos[0],ballpos[1]))*1 );
 //~   plot2d([fx, fy], "force field, Fx: " + Fx + ", Fy: " + Fy);
 
 
@@ -218,7 +220,12 @@ for(real tau=0; tau < tend; tau+=dt) {
   macro plotenv2(t1, t2, v1, v2, lab) Venvh t1=v1; Venvh t2=v2; plot2d([t1,t2], lab); // EOM
 
   border Benv(t=0,2*pi) { x = ballposold[0]+2*ballr*cos(t); y = ballposold[1]+2*ballr*sin(t); label = Lballenv; }
-  mesh Envh = buildmesh(Benv(2*ballh));
+  borderLineCycle4([ballposold[0]-2*ballr, ballposold[1]-2*ballr], Benvd, Lboxdown,
+                   [ballposold[0]+2*ballr, ballposold[1]-2*ballr], Benvr, Lboxright,
+                   [ballposold[0]+2*ballr, ballposold[1]+2*ballr], Benvu, Lboxup,
+                   [ballposold[0]-2*ballr, ballposold[1]+2*ballr], Benvl, Lboxleft)
+//~   mesh Envh = buildmesh(Benv(2*ballh));
+  mesh Envh = buildmesh(Benvd(ballh)+Benvr(ballh)+Benvu(ballh)+Benvl(ballh));  // square ball environment
   fespace Venvh(Envh, P3);
 //~   plot2d(Envh, "env mesh");
 

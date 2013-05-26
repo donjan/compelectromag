@@ -56,18 +56,19 @@ ballpos = [1., 4.];
 real ballr = 0.5;
 //~ int ballh = 60;
 //~ int frameh = 90;
-int ballh = 20;
-int frameh = 40;
-//~ int ballh = 15;
-//~ int frameh = 20;
+//~ int ballh = 20;
+//~ int frameh = 40;
+int ballh = 15;
+int frameh = 20;
 
 real[int] ballposold = ballpos;
+real ballposabs = 0;
 
 
 // Simulation parameters
 
-real dt = 0.1;
-real tend = dt*30;
+real dt = 0.01;
+real tend = dt*300;
 real switchtime = tend/2;
 real phiChi = 2;      // high constraint for phi
 real phiClo = -2;     // low constraint for phi
@@ -115,6 +116,7 @@ border B(t=0,2*pi) {
 ////////////////////////////////////////////////////////////////////////////////
 
 //~ ofstream of("forces");
+//~ ofstream of("ballmovement");
 for(real tau=0; tau < tend; tau+=dt) {
 
   // Build meshes
@@ -128,8 +130,9 @@ for(real tau=0; tau < tend; tau+=dt) {
   fespace Ph(Allh,P0);
 
   Ph reg = region;
-  int rE  = reg( 4.95,4.95);                        // frame
-  int rI  = reg( 2.5 ,1   );                        // vacuum
+  int rE  = reg( 4.95,4.95);                 // frame
+//~   int rI  = reg( 1.5   ,1   );               // vacuum
+  int rI  = reg( 2   ,1   );               // vacuum
   int rB  = reg(ballpos[0],ballpos[1]);      // ball region
 
   macro rEps(num) (reg==rE)*epsilon1[num]
@@ -151,7 +154,7 @@ for(real tau=0; tau < tend; tau+=dt) {
     Label1 = Lboxright;
     Label2 = Lboxleft;
   }
-  if(timedist(tau, 0.5*tend, dt)) {
+  if(timedist(tau, 0.4*tend, dt)) {
     swap(phiClo, phiChi, real, tmp);
   }
 
@@ -159,6 +162,7 @@ for(real tau=0; tau < tend; tau+=dt) {
   // Solve the problem
 
 //~   problem PoissonVarf(phi,w,solver=CG) = int2d(Allh)(
+//~   problem PoissonVarf(phi,w,solver = GMRES) = int2d(Allh)(
   problem PoissonVarf(phi,w) = int2d(Allh)(
       EPS[0][0] * dx(phi)*dx(w)
     + EPS[0][1] * dx(phi)*dy(w)
@@ -211,14 +215,21 @@ for(real tau=0; tau < tend; tau+=dt) {
 
 //~   plot2d(Allh, "mesh");
 //~   Ph eps00 = EPS[0][0]; plot3d(eps00, "eps00");
-  plot2d(phi, "phi");
+//~   plot2d(phi, "phi");
+  saveplot2d(phi, "phi_"+tau+".eps");
 //~   plot2d([D[0], D[1]], "D field");
 //~   plot2d(T[0], "T11");
 //~   plot2d(T[1], "T12");
 //~   plot2d(T[3], "T21");
 //~   plot2d(T[4], "T22");
+  fx = fx*( (reg!=reg(ballpos[0],ballpos[1]))*0 + (reg==reg(ballpos[0],ballpos[1]))*1 );      // zero out everything except ball forces
+  fy = fy*( (reg!=reg(ballpos[0],ballpos[1]))*0 + (reg==reg(ballpos[0],ballpos[1]))*1 );
 //~   plot2d([fx, fy], "force field, Fx: " + Fx + ", Fy: " + Fy);
+//~   saveplot2d([fx, fy], "ball_focefield.eps");
 
+//~   ballposabs += abs(ballpos[0]-ballposold[0])  + abs(ballpos[1]-ballposold[1]);
+//~   real ballvabs = sqrt(ballv[0]^2 + ballv[1]^2);
+//~   of << tau << "  " << ballposabs << "  " << ballvabs << endl;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Plotting environment
@@ -226,7 +237,13 @@ for(real tau=0; tau < tend; tau+=dt) {
   macro plotenv2(t1, t2, v1, v2, lab) Venvh t1=v1; Venvh t2=v2; plot2d([t1,t2], lab); // EOM
 
   border Benv(t=0,2*pi) { x = ballposold[0]+2*ballr*cos(t); y = ballposold[1]+2*ballr*sin(t); label = Lballenv; }
-  mesh Envh = buildmesh(Benv(2*ballh));
+  borderLineCycle4([ballposold[0]-2*ballr, ballposold[1]-2*ballr], Benvd, Lboxdown,
+                   [ballposold[0]+2*ballr, ballposold[1]-2*ballr], Benvr, Lboxright,
+                   [ballposold[0]+2*ballr, ballposold[1]+2*ballr], Benvu, Lboxup,
+                   [ballposold[0]-2*ballr, ballposold[1]+2*ballr], Benvl, Lboxleft)
+
+//~   mesh Envh = buildmesh(Benv(2*ballh));  // round ball environment
+  mesh Envh = buildmesh(Benvd(ballh)+Benvr(ballh)+Benvu(ballh)+Benvl(ballh));  // square ball environment
   fespace Venvh(Envh, P3);
 //~   plot2d(Envh, "env mesh");
 
