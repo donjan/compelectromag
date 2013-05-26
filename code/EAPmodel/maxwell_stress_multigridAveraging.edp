@@ -72,7 +72,7 @@ VhAvg epsAvg11,epsAvg12,epsAvg22;
 ifstream foptin("optimal.mesh");
 VhAvg epsAvg11opt;
 foptin >> epsAvg11opt[];
-
+ofstream fresid("residuals.txt");
 
 for(int mn = 1; mn<maxmn;mn++){
 
@@ -203,8 +203,9 @@ for(int mn = 1; mn<maxmn;mn++){
 		
 		epsAvg11 = epsAvg11 + epss11;
 		VhAvg eps11resid;
-		eps11resid = abs(epss11 - epsAvg11opt);
-		resid = int2d(Vh[0])(eps11resid);
+		eps11resid = abs(epss11 - epsAvg11opt/mn);
+		real resid = int2d(Th[0])(eps11resid);
+		fresid << resid << endl;
 		epsAvg12 = epsAvg12 + epss12;
 		epsAvg22 = epsAvg22 + epss22;
 		
