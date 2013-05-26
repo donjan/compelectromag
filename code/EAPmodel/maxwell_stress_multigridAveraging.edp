@@ -212,7 +212,7 @@ for(int mn = 1; mn<maxmn;mn++){
 		//save maximum displacement of beam:
 		//outFile <<phi[].max<<"/t"<< u[].max << "/t"<<v[].max<<endl;
 		//~ plot(Th,cmm="Deformed mesh",ps="DeformedMesh.eps");
-		plot(epss11,cmm="eps11",ps="eps11_3.eps",fill=true,value=true);
+//~ 		plot(epss11,cmm="eps11",ps="eps11_3.eps",fill=true,value=true);
 		//~ plot(epss12,cmm="eps12",ps="eps12_3.eps",fill=true,value=true);
 		//~ plot(epss22,cmm="eps22",ps="eps22_3.eps",fill=true,value=true);
 //~ 		plot([u,v],cmm="displacement",fill=true,value=true);
@@ -228,7 +228,7 @@ for(int mn = 1; mn<maxmn;mn++){
 	}
 }
 plot(epsAvg11,wait=true,fill=true,value=true);
-plot(epsAvg11,wait=true,fill=true,value=true, ps="eps11_avg.eps");
+//~ plot(epsAvg11,wait=true,fill=true,value=true, ps="eps11_avg.eps");
 plot(epsAvg12,wait=true,fill=true,value=true);
 plot(epsAvg22,wait=true,fill=true,value=true);
 qual<<int2d(Th[0])(epsAvg12) <<endl;
